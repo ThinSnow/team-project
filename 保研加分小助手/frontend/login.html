@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <!-- 添加这行代码 -->
+    <link rel="stylesheet" href="登录.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>保研小助手</h1>
+        </div>
+        <div class="main">
+            <form id="loginForm">
+                <span>
+                    <input type="text" id="username" placeholder="账号" maxlength="15">
+                </span><br>
+                <span>
+                    <input type="password" id="password" placeholder="密码" maxlength="20">
+                </span><br>
+                <a href="学生账号注册页面.html" class="zc">账号注册</a>
+                <a href="注册页面.html" class="mm">忘记密码</a>
+                <br>
+                <br>
+                <button type="button" class="btn btn-primary" onclick="handleLogin()">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 登录处理函数
+        async function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // 验证账号长度
+            if (username.length !== 15) {
+                alert('账号长度必须为15位');
+                return;
+            }
+            
+            // 验证密码长度
+            if (password.length > 20) {
+                alert('密码长度不能超过20位');
+                return;
+            }
+            
+            try {
+                // 发送POST请求到后端API
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // 根据后端返回的结果进行处理
+                if (result.success) {
+                    alert('登录成功！');
+                    // 登录成功，跳转到材料页面
+                    window.location.href = '材料.html';
+                } else {
+                    alert('登录失败：' + result.message);
+                }
+            } catch (error) {
+                console.error('登录错误:', error);
+                alert('登录过程中发生错误，请检查服务器是否启动');
+            }
+        }
+        
+        // 添加输入框长度限制
+        document.getElementById('username').addEventListener('input', function(e) {
+            if (this.value.length > 15) {
+                this.value = this.value.slice(0, 15);
+            }
+        });
+        
+        document.getElementById('password').addEventListener('input', function(e) {
+            if (this.value.length > 20) {
+                this.value = this.value.slice(0, 20);
+            }
+        });
+        
+        // 按回车键登录
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    </script>
+</body>
+</html>
