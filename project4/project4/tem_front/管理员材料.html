@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>材料管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        /* 左侧导航栏样式 */
+        .sidebar {
+            width: 220px;
+            background-color: rgb(65, 130, 104);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item:hover {
+            background-color: #34495e;
+        }
+        
+        .nav-item.active {
+            background-color: rgb(89, 176, 141);
+            border-left: 4px solid rgb(28, 152, 102);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        /* 选项卡样式 */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .tab.active {
+            background-color: rgb(72, 151, 120);
+            color: white;
+        }
+        
+        /* 搜索和操作区域 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #3090d0;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        /* 表格容器样式 */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, rgb(89, 179, 143), rgb(40, 131, 95));
+            color: white;
+            padding: 20px 25px;
+        }
+        
+        .table-header h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        
+        .table-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .table-scroll {
+            overflow-x: auto;
+            padding: 0 20px 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        
+        thead {
+            background-color: #f8f9fa;
+        }
+        
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+        }
+        
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .status-pending {
+            color: #e67e22;
+            font-weight: 600;
+        }
+        
+        .status-approved {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .status-rejected {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .expected-points {
+            color: #e67e22;
+            font-weight: 600;
+        }
+        
+        .actual-points {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .reject-reason {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .edit-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .edit-btn:hover {
+            background-color: #e67e22;
+        }
+        
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .approve-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .reject-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .view-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .footer {
+            padding: 15px 30px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        /* 页面内容切换 */
+        .page-content {
+            display: none;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 700px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .material-preview {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .material-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+        }
+        
+        .info-label {
+            width: 100px;
+            font-weight: 500;
+            color: #7f8c8d;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #2c3e50;
+        }
+        
+        .file-preview {
+            text-align: center;
+            padding: 30px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .file-preview i {
+            font-size: 48px;
+            color: rgb(72, 151, 120);
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: rgb(72, 151, 120);
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .nav-items {
+                display: flex;
+                justify-content: space-around;
+            }
+            
+            .nav-item {
+                flex: 1;
+                justify-content: center;
+                padding: 15px 10px;
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            
+            .nav-item span {
+                display: none;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .material-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-cell {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>保研小助手</h1>
+        </div>
+        <!--导航栏的三块内容-->
+        <div class="nav-items">
+            <div class="nav-item active">
+                <i class="fas fa-folder"></i>
+                <span>材料管理</span>
+            </div>
+            <div class="nav-item">
+                <a href="管理员成绩.html" class="nav-link"></a>
+                <i class="fas fa-chart-bar"></i>
+                <span>成绩管理</span>
+            </div>
+            <div class="nav-item">
+                <a href="profile.html" style="color: inherit; text-decoration: none; display: flex; align-items: center;"></a>
+                <i class="fas fa-user"></i>
+                <span>个人中心</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">材料管理系统</h1>
+        </div>
+        
+        <!-- 选项卡 -->
+        <div class="tabs">
+            <a href="#material-management" class="tab active" data-tab="material-management">材料管理</a>
+            <a href="#pending-review" class="tab" data-tab="pending-review">待审核</a>
+            <a href="#reviewed-materials" class="tab" data-tab="reviewed-materials">已审核</a>
+        </div>
+        
+        <!-- 材料管理页面 -->
+        <div class="page-content active" id="material-management">
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="materialSearch" placeholder="搜索学生姓名或材料名称...">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="exportMaterials">
+                        <i class="fas fa-file-excel"></i>
+                        导出Excel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>所有学生材料</h2>
+                    <p>共<span id="studentCount">0</span>名学生，<span id="materialCount">0</span>份材料</p>
+                </div>
+                
+                <div class="table-scroll">
+                    <table id="materialsTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">学号</th>
+                                <th style="width: 100px;">姓名</th>
+                                <th style="width: 150px;">材料名称</th>
+                                <th style="width: 120px;">材料类型</th>
+                                <th style="width: 120px;">上传时间</th>
+                                <th style="width: 100px;">审核状态</th>
+                                <th style="width: 180px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 数据将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="footer">
+                    <div class="info">
+                        最后更新: <span id="lastUpdateTime"></span>
+                    </div>
+                    <div class="pagination">
+                        第 1 页，共 1 页
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 待审核页面 -->
+        <div class="page-content" id="pending-review">
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="pendingSearch" placeholder="搜索学生姓名或材料名称...">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="exportPending">
+                        <i class="fas fa-file-excel"></i>
+                        导出Excel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>待审核材料</h2>
+                    <p>共<span id="pendingCount">0</span>份材料等待审核</p>
+                </div>
+                
+                <div class="table-scroll">
+                    <table id="pendingTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">学号</th>
+                                <th style="width: 100px;">姓名</th>
+                                <th style="width: 150px;">材料名称</th>
+                                <th style="width: 120px;">材料类型</th>
+                                <th style="width: 120px;">上传时间</th>
+                                <th style="width: 150px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 数据将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 已审核页面 -->
+        <div class="page-content" id="reviewed-materials">
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="reviewedSearch" placeholder="搜索学生姓名或材料名称...">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-success" id="exportReviewed">
+                        <i class="fas fa-file-excel"></i>
+                        导出Excel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>已审核材料</h2>
+                    <p>共<span id="reviewedCount">0</span>份材料已完成审核</p>
+                </div>
+                
+                <div class="table-scroll">
+                    <table id="reviewedTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">学号</th>
+                                <th style="width: 100px;">姓名</th>
+                                <th style="width: 150px;">材料名称</th>
+                                <th style="width: 120px;">材料类型</th>
+                                <th style="width: 120px;">上传时间</>
+                                <th style="width: 100px;">审核状态</th>
+                                <th style="width: 120px;">审核时间</th>
+                                <th style="width: 80px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 数据将通过JavaScript动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看材料模态框 -->
+    <div class="modal" id="viewMaterialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">材料详情</h2>
+                <button class="close-btn" id="closeViewModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="material-preview">
+                    <div class="preview-header">
+                        <h3 id="materialPreviewTitle">材料名称</h3>
+                        <span class="status-pending" id="materialPreviewStatus">待审核</span>
+                    </div>
+                    
+                    <div class="material-info">
+                        <div class="info-item">
+                            <div class="info-label">学号：</div>
+                            <div class="info-value" id="previewStudentId">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">姓名：</div>
+                            <div class="info-value" id="previewStudentName">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">材料类型：</div>
+                            <div class="info-value" id="previewMaterialType">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">上传时间：</div>
+                            <div class="info-value" id="previewUploadTime">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">上传日期：</div>
+                            <div class="info-value" id="previewUploadDay">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">审核时间：</div>
+                            <div class="info-value" id="previewReviewTime">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">审核日期：</div>
+                            <div class="info-value" id="previewReviewDay">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">预期加分：</div>
+                            <div class="info-value expected-points" id="previewExpectedPoints">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">实际加分：</div>
+                            <div class="info-value actual-points" id="previewActualPoints">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">审核人：</div>
+                            <div class="info-value" id="previewReviewOfficer">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 拒绝原因显示区域 -->
+                    <div id="rejectReasonContainer" style="display: none;">
+                        <div class="info-item">
+                            <div class="info-label">拒绝原因：</div>
+                            <div class="info-value reject-reason" id="previewRejectReason">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="file-preview">
+                        <i class="fas fa-file-pdf"></i>
+                        <p>PDF文件预览区域</p>
+                        <p class="info-value">在实际应用中，这里会显示文件的实际内容</p>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" id="downloadMaterial">
+                        <i class="fas fa-download"></i>
+                        下载文件
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑材料模态框 -->
+    <div class="modal" id="editMaterialModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">编辑材料信息</h2>
+                <button class="close-btn" id="closeEditModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">学号：</label>
+                    <input type="text" class="form-control" id="editStudentId" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">姓名：</label>
+                    <input type="text" class="form-control" id="editStudentName" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">材料名称：</label>
+                    <input type="text" class="form-control" id="editMaterialName" maxlength="35" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">材料类型：</label>
+                    <select class="form-control" id="editMaterialType" required>
+                        <option value="">请选择材料类型</option>
+                        <option value="sci_research">科研成果</option>
+                        <option value="competition">学业竞赛</option>
+                        <option value="creation">创新创业训练</option>
+                        <option value="internship">国际组织实习</option>
+                        <option value="army">参军入伍服兵役</option>
+                        <option value="volunteer">志愿服务</option>
+                        <option value="honor">荣誉奖项</option>
+                        <option value="social">社会实践</option>
+                        <option value="sport">文体活动</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">上传时间：</label>
+                    <div class="form-control" id="editUploadTime" style="background-color: #f5f5f5;" readonly></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">审核时间：</label>
+                    <div class="form-control" id="editReviewTime" style="background-color: #f5f5f5;" readonly></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">预期加分：</label>
+                    <div class="form-control" id="editExpectedPoints" style="background-color: #f5f5f5;" readonly></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">实际加分：</label>
+                    <input type="number" class="form-control" id="editActualPoints" min="0" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">审核人：</label>
+                    <input type="text" class="form-control" id="editReviewOfficer" maxlength="20">
+                </div>
+                
+               <!-- 拒绝原因输入区域 -->
+                <div id="editRejectReasonSection">
+                    <div class="form-group">
+                        <label class="form-label">拒绝原因：</label>
+                        <textarea class="form-control" id="editRejectReasonInput" rows="3" placeholder="请详细说明拒绝此材料的原因..." maxlength="200"></textarea>
+                        <div style="text-align: right; font-size: 12px; color: #666; margin-top: 5px;">
+                            <span id="editRejectReasonCount">0</span>/200
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 审核操作按钮（未审核材料显示） -->
+                <div id="reviewButtons" style="display: none; margin: 20px 0; text-align: center;">
+                    <button class="btn btn-success" id="approveMaterialBtn" style="margin-right: 10px;">
+                        <i class="fas fa-check"></i> 通过审核
+                    </button>
+                    <button class="btn btn-danger" id="rejectMaterialBtn">
+                        <i class="fas fa-times"></i> 拒绝审核
+                    </button>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="saveMaterial">保存修改</button>
+                    <button class="btn btn-primary" id="cancelEdit" style="background-color: #6c757d;">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 配置区域 ==========
+        // 开发阶段（使用Mock）
+        //const USE_MOCK = true; // true:使用Mock数据, false:连接真实API
+        
+        // 生产阶段（连接真实后端）
+        const USE_MOCK = false; // 改为false连接真实后端
+        const API_BASE_URL = 'http://localhost:8000/api/administer/getm'; // 真实API基础地址
+        
+        // API接口地址
+        const API_URLS = {
+            GET_MATERIALS_LIST: `${API_BASE_URL}`, // 获取材料列表GET
+            GET_MATERIAL_DETAIL: `${API_BASE_URL}`, // 获取材料详情PUT
+            UPDATE_MATERIAL: `${API_BASE_URL}`, // 更新材料信息（包含审核）POST
+            DELETE_MATERIAL: `${API_BASE_URL}` // 删除材料DELETE
+        };
+        // ========== 配置区域结束 ==========
+
+        // 材料类型映射
+        const materialTypeMap = {
+            'sci_research': '科研成果',
+            'competition': '学业竞赛',
+            'creation': '创新创业训练',
+            'internship': '国际组织实习',
+            'army': '参军入伍服兵役',
+            'volunteer': '志愿服务',
+            'honor': '荣誉奖项',
+            'social': '社会实践',
+            'sport': '文体活动'
+        };
+
+        // 审核状态映射
+        const reviewStateMap = {
+            '0': '待审核',
+            '1': '已通过',
+            '-1': '未通过'
+        };
+
+        // 审核状态类名映射
+        const reviewStateClassMap = {
+            '0': 'status-pending',
+            '1': 'status-approved',
+            '-1': 'status-rejected'
+        };
+
+        // 加分规则配置
+        const pointsRules = {
+            'sci_research': 5,
+            'competition': 4,
+            'creation': 4,
+            'internship': 3,
+            'army': 5,
+            'volunteer': 2,
+            'honor': 3,
+            'social': 2,
+            'sport': 1
+        };
+
+        // Mock数据 - 模拟后端返回的数据结构
+        const mockMaterialsData = [
+            { 
+                id: '202301001', 
+                name: '张三', 
+                material_name: '项目报告.pdf', 
+                material_type: 'sci_research', 
+                request_upload_time: '14:30:00',
+                request_upload_day: '2023-10-15',
+                review_state: 1,
+                review_upload_time: '09:20:00',
+                review_upload_day: '2023-10-16',
+                excepted_score: 5,
+                actual_score: 5,
+                failure_reason: '',
+                review_officer: '李老师'
+            },
+            { 
+                id: '202301001', 
+                name: '张三', 
+                material_name: '志愿时长认定.pdf', 
+                material_type: 'volunteer', 
+                request_upload_time: '09:15:00',
+                request_upload_day: '2023-10-12',
+                review_state: 1,
+                review_upload_time: '14:30:00',
+                review_upload_day: '2023-10-13',
+                excepted_score: 2,
+                actual_score: 2,
+                failure_reason: '',
+                review_officer: '王老师'
+            },
+            { 
+                id: '202301002', 
+                name: '李四', 
+                material_name: '科研竞赛证书.jpg', 
+                material_type: 'competition', 
+                request_upload_time: '16:45:00',
+                request_upload_day: '2023-10-18',
+                review_state: 0,
+                review_upload_time: '',
+                review_upload_day: '',
+                excepted_score: 4,
+                actual_score: 0,
+                failure_reason: '',
+                review_officer: ''
+            },
+            { 
+                id: '202301003', 
+                name: '王五', 
+                material_name: '班委任职证明.pdf', 
+                material_type: 'social', 
+                request_upload_time: '11:20:00',
+                request_upload_day: '2023-10-20',
+                review_state: 1,
+                review_upload_time: '10:15:00',
+                review_upload_day: '2023-10-21',
+                excepted_score: 2,
+                actual_score: 2,
+                failure_reason: '',
+                review_officer: '张老师'
+            },
+            { 
+                id: '202301004', 
+                name: '赵六', 
+                material_name: '文体活动证明.pdf', 
+                material_type: 'sport', 
+                request_upload_time: '13:10:00',
+                request_upload_day: '2023-10-22',
+                review_state: -1,
+                review_upload_time: '14:15:00',
+                review_upload_day: '2023-10-23',
+                excepted_score: 1,
+                actual_score: 0,
+                failure_reason: '证明材料不清晰，无法辨认活动内容',
+                review_officer: '陈老师'
+            }
+        ];
+
+        // 当前操作的材料信息
+        let currentMaterial = null;
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMaterialsData();
+            setupEventListeners();
+        });
+
+        // 加载材料数据
+        async function loadMaterialsData() {
+            try {
+                const result = await getMaterialsListApi();
+                
+                if (result.ret === 0) {
+                    renderAllTables(result.retlist);
+                    updateLastUpdateTime(); // 使用前端当前时间
+                } else {
+                    showError('获取材料数据失败');
+                }
+            } catch (error) {
+                showError(error.message+'1');
+            }
+        }
+
+        // 获取材料列表API - 简化响应格式
+        const getMaterialsListApi = async () => {
+            if (USE_MOCK) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (Math.random() < 0.1) {
+                    throw new Error("网络连接失败，请检查网络设置");
+                }
+                return { 
+                    ret: 0, 
+                    retlist: mockMaterialsData
+                };
+            } else {
+                try {
+                    const response = await fetch(API_URLS.GET_MATERIALS_LIST, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    return result;
+                    
+                } catch (error) {
+                    throw new Error("服务器连接失败: " + error.message);
+                }
+            }
+        };
+
+        // 获取材料详情API - 简化响应格式
+        const getMaterialDetailApi = async (studentId, materialName) => {
+            if (USE_MOCK) {
+                await new Promise(resolve => setTimeout(resolve, 300));
+                if (Math.random() < 0.1) {
+                    throw new Error("网络连接失败，请检查网络设置");
+                }
+                
+                const material = mockMaterialsData.find(m => 
+                    m.id === studentId && m.material_name === materialName
+                );
+                
+                if (material) {
+                    return { ret: 0, data: material };
+                } else {
+                    return { ret: 1 };
+                }
+            } else {
+                try {
+                    const response = await fetch(API_URLS.GET_MATERIAL_DETAIL,{//?id=${studentId}&material_name=${encodeURIComponent(materialName)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: studentId,
+                            material_name: encodeURIComponent(materialName),
+                            //...updateData
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    return result;
+                    
+                } catch (error) {
+                    throw new Error("服务器连接失败: " + error.message);
+                }
+            }
+        };
+
+        // 更新材料信息API - 简化响应格式
+        const updateMaterialApi = async (studentId, materialName, updateData) => {
+            if (USE_MOCK) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (Math.random() < 0.1) {
+                    throw new Error("网络连接失败，请检查网络设置");
+                }
+                
+                const materialIndex = mockMaterialsData.findIndex(m => 
+                    m.id === studentId && m.material_name === materialName
+                );
+                
+                if (materialIndex !== -1) {
+                    mockMaterialsData[materialIndex] = { 
+                        ...mockMaterialsData[materialIndex], 
+                        ...updateData 
+                    };
+                    return { ret: 0 };
+                } else {
+                    return { ret: 1 };
+                }
+            } else {
+                try {
+                    const response = await fetch(API_URLS.UPDATE_MATERIAL, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: studentId,
+                            material_name: materialName,
+                            newdata:{
+                                ...updateData
+                            }
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    return result;
+                    
+                } catch (error) {
+                    throw new Error("服务器连接失败: " + error.message);
+                }
+            }
+        };
+
+        // 删除材料API - 简化响应格式
+        const deleteMaterialApi = async (studentId, materialName) => {
+            if (USE_MOCK) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                if (Math.random() < 0.1) {
+                    throw new Error("网络连接失败，请检查网络设置");
+                }
+                
+                const materialIndex = mockMaterialsData.findIndex(m => 
+                    m.id === studentId && m.material_name === materialName
+                );
+                
+                if (materialIndex !== -1) {
+                    mockMaterialsData.splice(materialIndex, 1);
+                    return { ret: 0 };
+                } else {
+                    return { ret: 1 };
+                }
+            } else {
+                try {
+                    const response = await fetch(API_URLS.DELETE_MATERIAL, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: studentId,
+                            material_name: materialName
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    return result;
+                    
+                } catch (error) {
+                    throw new Error("服务器连接失败: " + error.message);
+                }
+            }
+        };
+
+        // 更新最后更新时间 - 使用前端当前时间
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const day = now.toISOString().split('T')[0];
+            const time = now.toTimeString().split(' ')[0];
+            document.getElementById('lastUpdateTime').textContent = `${day} ${time}`;
+        }
+
+        // 渲染所有表格
+        function renderAllTables(materialsData) {
+            renderMaterialsTable(materialsData);
+            renderPendingTable(materialsData);
+            renderReviewedTable(materialsData);
+            
+            // 更新统计信息
+            const studentCount = new Set(materialsData.map(m => m.id)).size;
+            document.getElementById('studentCount').textContent = studentCount;
+            document.getElementById('materialCount').textContent = materialsData.length;
+        }
+
+        // 渲染材料管理表格
+        function renderMaterialsTable(materialsData) {
+            const tbody = document.querySelector('#materialsTable tbody');
+            tbody.innerHTML = '';
+            
+            materialsData.forEach(material => {
+                const statusText = reviewStateMap[material.review_state] || '未知';
+                const statusClass = reviewStateClassMap[material.review_state] || '';
+                const materialTypeText = materialTypeMap[material.material_type] || material.material_type;
+                const uploadTime = `${material.request_upload_day} ${material.request_upload_time}`;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${material.id}</td>
+                    <td>${material.name}</td>
+                    <td>${material.material_name}</td>
+                    <td>${materialTypeText}</td>
+                    <td>${uploadTime}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td class="action-cell">
+                        <button class="action-btn edit-btn" data-id="${material.id}" data-material="${material.material_name}">修改</button>
+                        <button class="action-btn delete-btn" data-id="${material.id}" data-material="${material.material_name}">删除</button>
+                        <button class="action-btn view-btn" data-id="${material.id}" data-material="${material.material_name}">查看</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 绑定按钮事件
+            bindMaterialsTableEvents();
+        }
+
+        // 渲染待审核表格
+        function renderPendingTable(materialsData) {
+            const tbody = document.querySelector('#pendingTable tbody');
+            tbody.innerHTML = '';
+            
+            const pendingMaterials = materialsData.filter(m => m.review_state === 0);
+            document.getElementById('pendingCount').textContent = pendingMaterials.length;
+            
+            pendingMaterials.forEach(material => {
+                const materialTypeText = materialTypeMap[material.material_type] || material.material_type;
+                const uploadTime = `${material.request_upload_day} ${material.request_upload_time}`;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${material.id}</td>
+                    <td>${material.name}</td>
+                    <td>${material.material_name}</td>
+                    <td>${materialTypeText}</td>
+                    <td>${uploadTime}</td>
+                    <td class="action-cell">
+                        <button class="action-btn view-btn" data-id="${material.id}" data-material="${material.material_name}">审核</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 绑定按钮事件
+            bindPendingTableEvents();
+        }
+
+        // 渲染已审核表格
+        function renderReviewedTable(materialsData) {
+            const tbody = document.querySelector('#reviewedTable tbody');
+            tbody.innerHTML = '';
+            
+            const reviewedMaterials = materialsData.filter(m => m.review_state !== 0);
+            document.getElementById('reviewedCount').textContent = reviewedMaterials.length;
+            
+            reviewedMaterials.forEach(material => {
+                const statusText = reviewStateMap[material.review_state] || '未知';
+                const statusClass = reviewStateClassMap[material.review_state] || '';
+                const materialTypeText = materialTypeMap[material.material_type] || material.material_type;
+                const uploadTime = `${material.request_upload_day} ${material.request_upload_time}`;
+                const reviewTime = material.review_upload_day && material.review_upload_time ? 
+                    `${material.review_upload_day} ${material.review_upload_time}` : '-';
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${material.id}</td>
+                    <td>${material.name}</td>
+                    <td>${material.material_name}</td>
+                    <td>${materialTypeText}</td>
+                    <td>${uploadTime}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td>${reviewTime}</td>
+                    <td class="action-cell">
+                        <button class="action-btn view-btn" data-id="${material.id}" data-material="${material.material_name}">查看</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // 绑定查看按钮事件
+            document.querySelectorAll('#reviewedTable .view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    const materialName = this.getAttribute('data-material');
+                    showMaterialDetails(studentId, materialName);
+                });
+            });
+        }
+
+        // 绑定材料管理表格事件
+        function bindMaterialsTableEvents() {
+            // 修改按钮
+            document.querySelectorAll('#materialsTable .edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    const materialName = this.getAttribute('data-material');
+                    showEditMaterialModal(studentId, materialName);
+                });
+            });
+            
+            // 删除按钮
+            document.querySelectorAll('#materialsTable .delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    const materialName = this.getAttribute('data-material');
+                    deleteMaterial(studentId, materialName);
+                });
+            });
+            
+            // 查看按钮
+            document.querySelectorAll('#materialsTable .view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    const materialName = this.getAttribute('data-material');
+                    showMaterialDetails(studentId, materialName);
+                });
+            });
+        }
+
+        // 绑定待审核表格事件
+        function bindPendingTableEvents() {
+            // 审核按钮（查看详情进行审核）
+            document.querySelectorAll('#pendingTable .view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    const materialName = this.getAttribute('data-material');
+                    showEditMaterialModal(studentId, materialName);
+                });
+            });
+        }
+
+        // 显示编辑材料模态框（包含审核功能）
+        async function showEditMaterialModal(studentId, materialName) {
+            try {
+                const result = await getMaterialDetailApi(studentId, materialName);
+                
+                if (result.ret === 0) {
+                    currentMaterial = result.retlist[0];
+                    updateEditModalContent(currentMaterial);
+                    document.getElementById('editMaterialModal').style.display = 'flex';
+                } else {
+                    showError('获取材料详情失败');
+                }
+            } catch (error) {
+                showError(error.message+'2');
+            }
+        }
+
+        // 更新编辑模态框内容
+        function updateEditModalContent(material) {
+            const materialTypeText = materialTypeMap[material.material_type] || material.material_type;
+            
+            // 更新基本信息
+            document.getElementById('editStudentId').value = material.id;
+            document.getElementById('editStudentName').value = material.name;
+            document.getElementById('editMaterialName').value = material.material_name;
+            document.getElementById('editMaterialType').value = material.material_type;
+            document.getElementById('editReviewOfficer').value = material.review_officer || '';
+            
+            // 显示上传时间
+            document.getElementById('editUploadTime').textContent = 
+                `${material.request_upload_day} ${material.request_upload_time}`;
+            
+            // 显示审核时间
+            document.getElementById('editReviewTime').textContent = 
+                material.review_upload_time && material.review_upload_day ? 
+                `${material.review_upload_day} ${material.review_upload_time}` : '-';
+            
+            // 预期加分
+            document.getElementById('editExpectedPoints').textContent = `+${material.excepted_score}`;
+            
+            // 实际加分
+            document.getElementById('editActualPoints').value = material.actual_score;
+            
+            // 拒绝原因
+            document.getElementById('editRejectReasonInput').value = material.failure_reason || '';
+            document.getElementById('editRejectReasonCount').textContent = (material.failure_reason || '').length;
+            
+            // 控制审核按钮的显示
+            const reviewButtons = document.getElementById('reviewButtons');
+            if (material.review_state === 0) {
+                reviewButtons.style.display = 'block';
+            } else {
+                reviewButtons.style.display = 'none';
+            }
+        }
+
+        // 保存材料修改
+        async function saveMaterialChanges() {
+            const materialName = document.getElementById('editMaterialName').value.trim();
+            const materialType = document.getElementById('editMaterialType').value;
+            const reviewOfficer = document.getElementById('editReviewOfficer').value.trim();
+            const actualScore = parseFloat(document.getElementById('editActualPoints').value) || 0;
+            const rejectReason = document.getElementById('editRejectReasonInput').value.trim();
+            
+            if (!materialName || !materialType) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            if (materialName.length > 35) {
+                alert('材料名称不能超过35个字符');
+                return;
+            }
+            
+            if (reviewOfficer.length > 20) {
+                alert('审核人姓名不能超过20个字符');
+                return;
+            }
+            
+            if (actualScore < 0 || actualScore > currentMaterial.excepted_score) {
+                alert(`实际加分应在0到${currentMaterial.excepted_score}之间`);
+                return;
+            }
+            
+            if (rejectReason.length > 200) {
+                alert('拒绝原因不能超过200个字符');
+                return;
+            }
+            
+            try {
+                const updateData = {
+                    material_name: materialName,
+                    material_type: materialType,
+                    review_officer: reviewOfficer,
+                    actual_score: actualScore,
+                    failure_reason: rejectReason
+                };
+                
+                const result = await updateMaterialApi(currentMaterial.id, currentMaterial.material_name, updateData);
+                
+                if (result.ret === 0) {
+                    alert('材料信息修改成功');
+                    document.getElementById('editMaterialModal').style.display = 'none';
+                    loadMaterialsData();
+                } else {
+                    showError('修改材料信息失败');
+                }
+            } catch (error) {
+                showError(error.message+'3');
+            }
+        }
+
+        // 审核通过材料
+        async function approveMaterial() {
+            const actualScore = parseFloat(document.getElementById('editActualPoints').value) || 0;
+            const rejectReason = document.getElementById('editRejectReasonInput').value.trim();
+            
+            if (actualScore === 0) {
+                alert('实际加分为0，请先设置实际加分或选择拒绝审核');
+                return;
+            }
+            
+            if (confirm(`确定要通过 ${currentMaterial.name} 的 ${currentMaterial.material_name} 吗？`)) {
+                try {
+                    const reviewOfficer = document.getElementById('editReviewOfficer').value.trim() || '当前用户';
+                    const updateData = {
+                        review_state: 1,
+                        review_officer: reviewOfficer,
+                        actual_score: actualScore,
+                        failure_reason: ''
+                    };
+                    
+                    const result = await updateMaterialApi(currentMaterial.id, currentMaterial.material_name, updateData);
+                    
+                    if (result.ret === 0) {
+                        alert(`已通过 ${currentMaterial.name} 的 ${currentMaterial.material_name}`);
+                        document.getElementById('editMaterialModal').style.display = 'none';
+                        loadMaterialsData();
+                    } else {
+                        throw new Error('审核操作失败');
+                    }
+                } catch (error) {
+                    showError(error.message+'4');
+                }
+            }
+        }
+
+        // 拒绝材料
+        async function rejectMaterial() {
+            const rejectReason = document.getElementById('editRejectReasonInput').value.trim();
+            if (!rejectReason) {
+                alert('请填写拒绝原因');
+                return;
+            }
+
+            if (rejectReason.length > 200) {
+                alert('拒绝原因不能超过200个字符');
+                return;
+            }
+
+            if (confirm(`确定要拒绝 ${currentMaterial.name} 的 ${currentMaterial.material_name} 吗？`)) {
+                try {
+                    const reviewOfficer = document.getElementById('editReviewOfficer').value.trim() || '当前用户';
+                    const updateData = {
+                        review_state: -1,
+                        failure_reason: rejectReason,
+                        review_officer: reviewOfficer,
+                        actual_score: 0
+                    };
+                    
+                    const result = await updateMaterialApi(currentMaterial.id, currentMaterial.material_name, updateData);
+                    
+                    if (result.ret === 0) {
+                        alert(`已拒绝材料`);
+                        document.getElementById('editMaterialModal').style.display = 'none';
+                        loadMaterialsData();
+                    } else {
+                        throw new Error('审核操作失败');
+                    }
+                } catch (error) {
+                    showError(error.message+'5');
+                }
+            }
+        }
+
+        // 删除材料
+        async function deleteMaterial(studentId, materialName) {
+            const material = mockMaterialsData.find(m => m.id === studentId && m.material_name === materialName);
+            if (!material) {
+                alert('未找到该学生信息');
+                return;
+            }
+            
+            if (!confirm(`确定要删除 ${material.name} (${material.id}) 的成绩记录吗？此操作不可恢复！`)) {
+                return;
+            }
+            
+            try {
+                const result = await deleteMaterialApi(studentId, materialName);
+                
+                if (result.ret === 0) {
+                    alert('学生删除成功');
+                    loadMaterialsData();
+                } else {
+                    throw new Error('删除学生信息失败');
+                }
+                
+            } catch (error) {
+                console.error('删除学生失败:', error);
+                alert('删除学生失败: ' + error.message);
+            }
+        }
+
+        // 显示材料详情
+        async function showMaterialDetails(studentId, materialName) {
+            try {
+                const result = await getMaterialDetailApi(studentId, materialName);
+                
+                if (result.ret === 0) {
+                    const material = result.retlist[0];
+                    const materialTypeText = materialTypeMap[material.material_type] || material.material_type;
+                    
+                    // 更新模态框内容
+                    document.getElementById('materialPreviewTitle').textContent = material.material_name;
+                    document.getElementById('materialPreviewStatus').textContent = reviewStateMap[material.review_state] || '未知';
+                    document.getElementById('materialPreviewStatus').className = reviewStateClassMap[material.review_state] || '';
+                    document.getElementById('previewStudentId').textContent = material.id;
+                    document.getElementById('previewStudentName').textContent = material.name;
+                    document.getElementById('previewMaterialType').textContent = materialTypeText;
+                    document.getElementById('previewUploadTime').textContent = material.request_upload_time;
+                    document.getElementById('previewUploadDay').textContent = material.request_upload_day;
+                    document.getElementById('previewReviewTime').textContent = material.review_upload_time || '-';
+                    document.getElementById('previewReviewDay').textContent = material.review_upload_day || '-';
+                    document.getElementById('previewExpectedPoints').textContent = `+${material.excepted_score}`;
+                    document.getElementById('previewActualPoints').textContent = material.actual_score !== 0 ? `+${material.actual_score}` : material.actual_score;
+                    document.getElementById('previewReviewOfficer').textContent = material.review_officer || '-';
+                    
+                    // 显示或隐藏拒绝原因
+                    const rejectReasonContainer = document.getElementById('rejectReasonContainer');
+                    const previewRejectReason = document.getElementById('previewRejectReason');
+                    
+                    if (material.review_state === -1 && material.failure_reason) {
+                        rejectReasonContainer.style.display = 'block';
+                        previewRejectReason.textContent = material.failure_reason;
+                    } else {
+                        rejectReasonContainer.style.display = 'none';
+                    }
+                    
+                    // 根据审核状态设置样式
+                    const statusElement = document.getElementById('materialPreviewStatus');
+                    switch (material.review_state) {
+                        case 0:
+                            statusElement.className = 'status-pending';
+                            statusElement.textContent = '待审核';
+                            break;
+                        case 1:
+                            statusElement.className = 'status-approved';
+                            statusElement.textContent = '已通过';
+                            break;
+                        case -1:
+                            statusElement.className = 'status-rejected';
+                            statusElement.textContent = '未通过';
+                            break;
+                        default:
+                            statusElement.className = '';
+                            statusElement.textContent = '未知';
+                    }
+                    
+                    // 显示模态框
+                    document.getElementById('viewMaterialModal').style.display = 'flex';
+                } else {
+                    showError(result.msg);
+                }
+            } catch (error) {
+                showError(error.message+'6');
+            }
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            alert('错误: ' + message);
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 选项卡切换
+            document.querySelectorAll('.tab[data-tab]').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 更新选项卡激活状态
+                    document.querySelectorAll('.tab[data-tab]').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // 切换页面内容
+                    const targetTab = this.getAttribute('data-tab');
+                    document.querySelectorAll('.page-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+            
+            // 搜索功能
+            setupSearchFunctionality();
+            
+            // 导出功能
+            setupExportFunctionality();
+            
+            // 模态框关闭
+            document.getElementById('closeViewModal').addEventListener('click', function() {
+                document.getElementById('viewMaterialModal').style.display = 'none';
+            });
+            
+            document.getElementById('closeEditModal').addEventListener('click', function() {
+                document.getElementById('editMaterialModal').style.display = 'none';
+            });
+            
+            document.getElementById('cancelEdit').addEventListener('click', function() {
+                document.getElementById('editMaterialModal').style.display = 'none';
+            });
+            
+            // 保存修改
+            document.getElementById('saveMaterial').addEventListener('click', saveMaterialChanges);
+            
+            // 审核通过按钮
+            document.getElementById('approveMaterialBtn').addEventListener('click', approveMaterial);
+            
+            // 拒绝按钮
+            document.getElementById('rejectMaterialBtn').addEventListener('click', rejectMaterial);
+            
+            // 下载按钮
+            document.getElementById('downloadMaterial').addEventListener('click', function() {
+                alert('文件下载功能在实际应用中会连接到后端API');
+            });
+            
+            // 拒绝原因字数统计
+            document.getElementById('editRejectReasonInput').addEventListener('input', function() {
+                document.getElementById('editRejectReasonCount').textContent = this.value.length;
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === document.getElementById('viewMaterialModal')) {
+                    document.getElementById('viewMaterialModal').style.display = 'none';
+                }
+                if (event.target === document.getElementById('editMaterialModal')) {
+                    document.getElementById('editMaterialModal').style.display = 'none';
+                }
+            });
+        }
+
+        // 设置搜索功能
+        function setupSearchFunctionality() {
+            // 材料管理搜索
+            document.getElementById('materialSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#materialsTable tbody tr');
+                
+                rows.forEach(row => {
+                    const studentId = row.cells[0].textContent.toLowerCase();
+                    const studentName = row.cells[1].textContent.toLowerCase();
+                    const materialName = row.cells[2].textContent.toLowerCase();
+                    
+                    if (studentId.includes(searchTerm) || studentName.includes(searchTerm) || materialName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // 待审核搜索
+            document.getElementById('pendingSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#pendingTable tbody tr');
+                
+                rows.forEach(row => {
+                    const studentId = row.cells[0].textContent.toLowerCase();
+                    const studentName = row.cells[1].textContent.toLowerCase();
+                    const materialName = row.cells[2].textContent.toLowerCase();
+                    
+                    if (studentId.includes(searchTerm) || studentName.includes(searchTerm) || materialName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // 已审核搜索
+            document.getElementById('reviewedSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#reviewedTable tbody tr');
+                
+                rows.forEach(row => {
+                    const studentId = row.cells[0].textContent.toLowerCase();
+                    const studentName = row.cells[1].textContent.toLowerCase();
+                    const materialName = row.cells[2].textContent.toLowerCase();
+                    
+                    if (studentId.includes(searchTerm) || studentName.includes(searchTerm) || materialName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // 设置导出功能
+        function setupExportFunctionality() {
+            document.getElementById('exportMaterials').addEventListener('click', function() {
+                alert('材料数据已导出为Excel文件');
+            });
+            
+            document.getElementById('exportPending').addEventListener('click', function() {
+                alert('待审核数据已导出为Excel文件');
+            });
+            
+            document.getElementById('exportReviewed').addEventListener('click', function() {
+                alert('已审核数据已导出为Excel文件');
+            });
+        }
+
+        // 导航栏切换功能
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // 点击导航栏的不同部分可跳转到相应页面
+                const pageTitle = document.querySelector('.page-title');
+                if (this.querySelector('span').textContent === '材料管理') {
+                    pageTitle.textContent = '材料管理';
+                } else if (this.querySelector('span').textContent === '成绩管理') {
+                    pageTitle.textContent = '成绩管理';
+                    window.location.href = '管理员成绩.html';
+                } else if (this.querySelector('span').textContent === '个人中心') {
+                    pageTitle.textContent = '个人中心';
+                    window.location.href = '管理员个人中心.html';
+                }
+            });
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMaterialsData();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>

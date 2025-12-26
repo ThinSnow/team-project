@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生账号注册</title>
+    <style>
+        /* 样式保持不变 */
+        body{
+            font-family: sans-serif;
+            background-image: url(./登录页.png);
+            background-repeat: no-repeat;
+            overflow: hidden;
+            background-size: cover;
+        }
+        .container{
+            width: 380px;
+            height: 530px;
+            margin: 7% auto;
+            border-radius: 25px;
+            background-color: aliceblue;
+            box-shadow: 0 0 17px #000000;
+            
+        }
+
+        .header{
+            text-align: center;
+            padding-top: 40px;
+        }
+
+        .header h1{
+            color: rgb(99, 200, 160);
+            font-size: 45px;
+            margin-bottom: 55px;
+        }
+
+        .main{
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .main input{
+            width: 300px;
+            height: 40px;
+            border: none;
+            outline: none;
+            padding-left: 40px;
+            box-sizing: border-box;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .xs{
+            border: 2px solid rgb(99, 200, 160);
+            text-decoration: none;
+            font-size: 14px;
+            background-color: aliceblue;
+            margin-left: 0px;
+            color: rgb(99, 200, 160);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .gly{
+            border: none;
+            text-decoration: none;
+            font-size: 14px;
+            background-color: aliceblue;
+            margin-left: 20px;
+            color:#6e6d6d;
+            padding: 5px 10px;
+        }
+
+        .ljzc{
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            text-decoration: none;
+            font-size: 20px;
+            background-color: rgb(99, 200, 160);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 300px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .input-group label {
+            width: 100px;
+            padding-top: 10px;
+            font-weight: bold;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            max-width: 250px;
+        }
+
+        .input-group input {
+            width: 100% !important;
+            padding: 5px 10px !important;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .input-group input:hover{
+            box-shadow: 2px 2px 5px #555;
+            background-color: rgb(225, 225, 225);
+        }
+
+        .input-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-align: left;
+        }
+        
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            text-align: left;
+            display: none;
+        }
+        
+        .loading {
+            color: rgb(99, 200, 160);
+            font-size: 14px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        .success-message {
+            color: #4CAF50;
+            font-size: 14px;
+            margin: 10px 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>注册</h1>
+        </div>
+        <div class="main">
+            <form id="registerForm">
+                <a href="学生账号注册页面.html" class="xs">学生账号注册</a>
+                <a href="管理员注册页面.html" class="gly">管理员账号注册</a>
+                <br>
+                <br>
+                <br>
+
+                <div class="input-group">
+                    <label for="student-id">学号：</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="student-id" name="studentId" placeholder="请输入学号(最多15位)" maxlength="15">
+                        <div class="error-message" id="studentIdError"></div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="password">密码：</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="密码长度6-20位，包含字母和数字" maxlength="20">
+                        <div class="input-note">密码长度6-20位，需包含字母和数字</div>
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirm-password">确认密码：</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="confirm-password" name="confirmPassword" placeholder="请再次输入密码" maxlength="20">
+                        <div class="error-message" id="confirmPasswordError"></div>
+                    </div>
+                </div>
+                
+                <div class="loading" id="loadingMessage">注册中，请稍候...</div>
+                <div class="success-message" id="successMessage"></div>
+
+                <button type="submit" class="ljzc" id="registerBtn">立即注册</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ========== 配置区域 ==========
+        // 开发阶段（使用Mock）
+        //const USE_MOCK = true; // true:使用Mock数据, false:连接真实API
+        
+        // 生产阶段（连接真实后端）
+        const USE_MOCK = false; // 改为false连接真实后端
+        const API_URL = 'http://localhost:8000/api/student/register'; // 真实API地址
+        // ========== 配置区域结束 ==========
+        
+        // Mock数据 - 模拟已注册用户（类似登录页面的Mock数据）
+        const mockRegisteredUsers = [
+            { id: "202100100100001", password: "password123" },
+            { id: "202100100100003", password: "admin123" },
+            { id: "123456", password: "demo123" },
+            { id: "test", password: "test123" }
+        ];
+
+        // Mock注册函数 - 模拟后端注册响应
+        const mockRegister = async (id, password) => {
+            // 模拟网络延迟
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // 检查学号是否已存在（模拟用户已注册的情况）
+            const existingUser = mockRegisteredUsers.find(user => user.id === id);
+            
+            if (existingUser) {
+                // 返回ret:1表示注册失败（学号已存在）
+                return {
+                    ret: 1
+                };
+            }
+            
+            // 模拟注册成功，返回ret:0
+            return {
+                ret: 0
+            };
+        };
+
+        // 真实API调用函数 - 修改为处理新的返回格式
+        const realApiCall = async (id, password) => {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        action:'add_students',
+                        data:{   
+                            id: id, // 字段名改为id
+                            password: password
+                        }
+                    })
+                });
+                
+                if (!response.ok) {
+                    // 处理HTTP错误状态码（如404等）
+                    throw new Error(`服务器错误! 状态码: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // 后端返回ret:0表示成功，ret:1表示失败
+                if (result.ret === 0) {
+                    return {
+                        ret: 0
+                    };
+                } else {
+                    return {
+                        ret: 1
+                    };
+                }
+                
+            } catch (error) {
+                throw new Error("服务器连接失败: " + error.message);
+            }
+        };
+
+        // 根据配置选择API调用方式
+        const apiCall = USE_MOCK ? mockRegister : realApiCall;
+
+        // 表单提交事件处理
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('student-id').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const loadingMessage = document.getElementById('loadingMessage');
+            const successMessage = document.getElementById('successMessage');
+            const registerBtn = document.getElementById('registerBtn');
+            
+            clearErrors();
+            successMessage.style.display = 'none';
+            
+            if (!validateForm(studentId, password, confirmPassword)) {
+                return;
+            }
+            
+            // 显示加载状态
+            loadingMessage.style.display = 'block';
+            registerBtn.disabled = true;
+            registerBtn.textContent = '注册中...';
+            
+            try {
+                // 使用配置的API调用方式，传递id和password给后端
+                const result = await apiCall(studentId, password);
+                
+                // 隐藏加载状态
+                loadingMessage.style.display = 'none';
+                
+                // 根据后端返回的ret值判断注册结果
+                if (result.ret === 0) {
+                    // 注册成功 - 显示成功消息
+                    successMessage.textContent = '注册成功！正在跳转到登录页面...';
+                    successMessage.style.display = 'block';
+                    
+                    // 保存注册成功的学号到本地存储，方便登录页面使用
+                    localStorage.setItem('lastRegisteredStudentId', studentId);
+                    
+                    // 2秒后跳转到登录页面
+                    setTimeout(() => {
+                        window.location.href = "登陆注册.html";
+                    }, 2000);
+                    
+                } else {
+                    // 注册失败（学号已存在或其他原因）
+                    showError('studentIdError', '该学号已被注册，请使用其他学号');
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = '立即注册';
+                }
+                
+            } catch (error) {
+                loadingMessage.style.display = 'none';
+                showError('studentIdError', error.message);
+                registerBtn.disabled = false;
+                registerBtn.textContent = '立即注册';
+            }
+        });
+        
+        // 前端表单验证（保持不变）
+        function validateForm(studentId, password, confirmPassword) {
+            let isValid = true;
+            
+            // 学号验证
+            if (!studentId) {
+                showError('studentIdError', '学号不能为空');
+                isValid = false;
+            } else if (studentId.length > 15) {
+                showError('studentIdError', '学号长度不能超过15位');
+                isValid = false;
+            }
+            
+            // 密码验证
+            if (!password) {
+                showError('passwordError', '密码不能为空');
+                isValid = false;
+            } else if (password.length < 6 || password.length > 20) {
+                showError('passwordError', '密码长度需在6-20位之间');
+                isValid = false;
+            } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+                showError('passwordError', '密码需包含字母和数字');
+                isValid = false;
+            }
+            
+            // 确认密码验证
+            if (!confirmPassword) {
+                showError('confirmPasswordError', '请确认密码');
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                showError('confirmPasswordError', '两次输入的密码不一致');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // 显示错误信息（保持不变）
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        // 清除所有错误信息（保持不变）
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(element => {
+                element.style.display = 'none';
+                element.textContent = '';
+            });
+        }
+        
+        // 输入框实时验证（保持不变）
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const errorElement = document.getElementById('passwordError');
+            
+            if (password && (password.length < 6 || password.length > 20)) {
+                errorElement.textContent = '密码长度需在6-20位之间';
+                errorElement.style.display = 'block';
+            } else if (password && !/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+                errorElement.textContent = '密码需包含字母和数字';
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('confirm-password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const errorElement = document.getElementById('confirmPasswordError');
+            
+            if (confirmPassword && password !== confirmPassword) {
+                errorElement.textContent = '两次输入的密码不一致';
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+        
+        // 学号输入限制（保持不变）
+        document.getElementById('student-id').addEventListener('input', function() {
+            if (this.value.length > 15) {
+                this.value = this.value.slice(0, 15);
+            }
+        });
+        
+        // 页面加载时检查是否有上次注册的学号（保持不变）
+        window.addEventListener('load', function() {
+            const lastStudentId = localStorage.getItem('lastRegisteredStudentId');
+            if (lastStudentId) {
+                console.log('检测到上次注册的学号:', lastStudentId);
+                // 可以在这里添加逻辑，比如自动填充到登录页面
+            }
+        });
+    </script>
+</body>
+</html>

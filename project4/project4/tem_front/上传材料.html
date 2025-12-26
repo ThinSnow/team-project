@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传材料</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: rgb(99, 200, 160);
+            margin-right: 15px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .upload-area {
+            border: 2px dashed rgb(99, 200, 160);
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background-color: #f8fafc;
+        }
+        
+        .upload-area i {
+            font-size: 64px;
+            color: rgb(99, 200, 160);
+            margin-bottom: 20px;
+        }
+        
+        .upload-area h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .upload-area p {
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: rgb(81, 166, 132);
+        }
+        
+        .char-count {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .input-note {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: rgb(99, 200, 160);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: rgb(72, 151, 120);
+        }
+        
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="page-title">上传材料</h1>
+        </div>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h3>点击选择文件或拖拽文件到此处</h3>
+            <p>支持PDF, DOC, DOCX, XLS, XLSX, JPG, PNG格式</p>
+            <p>单个文件大小不超过 10MB</p>
+            <input type="file" class="file-input" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+        </div>
+        
+        <div class="form-group">
+            <label for="materialName">材料名称</label>
+            <input type="text" class="form-control" id="materialName" placeholder="请输入材料名称(最多35字)" maxlength="35">
+            <div class="char-count"><span id="nameCharCount">0</span>/35</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="materialType">材料类型</label>
+            <select class="form-control" id="materialType">
+                <option value="">请选择材料类型</option>
+                <option value="sci_research">科研成果</option>
+                <option value="competition">学业竞赛</option>
+                <option value="creation">创新创业训练</option>
+                <option value="internship">国际组织实习</option>
+                <option value="army">参军入伍服兵役</option>
+                <option value="volunteer">志愿服务</option>
+                <option value="honor">荣誉奖项</option>
+                <option value="social">社会实践</option>
+                <option value="sport">文体活动</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="expectedScore">预期加分</label>
+            <input type="number" class="form-control" id="expectedScore" placeholder="请输入预期加分(如: 0.5)" step="0.0001" min="0" max="10">
+            <div class="input-note">请输入0-10之间的数字，支持小数点后四位</div>
+        </div>
+        
+        <div class="actions">
+            <a href="材料.html" class="btn btn-secondary">
+                <i class="fas fa-times"></i>
+                取消
+            </a>
+            <button class="btn btn-primary" id="uploadBtn">
+                <i class="fas fa-check"></i>
+                确认上传
+            </button>
+        </div>
+
+        <!-- 消息提示 -->
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script>
+        // ========== 配置区域 ==========
+        const USE_MOCK = false; // true:使用Mock数据, false:连接真实API
+        const UPLOAD_API_URL = 'http://localhost:8000/api/student/addfile'; // 真实上传API地址
+        // ========== 配置区域结束 ==========
+
+        // 获取当前用户ID
+        function getCurrentUserId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let id = urlParams.get('id');
+            
+            if (!id) {
+                id = localStorage.getItem('id');
+            }
+            
+            return id;
+        }
+
+        // Mock上传函数（移除message字段）
+        const mockUploadMaterial = async (formData) => {
+            // 模拟网络延迟
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 模拟80%的成功率
+            const isSuccess = Math.random() > 0.2;
+            
+            if (isSuccess) {
+                return {
+                    ret: 0  // 只有ret字段，没有message
+                };
+            } else {
+                return {
+                    ret: 1  // 只有ret字段，没有message
+                };
+            }
+        };
+
+        // 真实API调用函数
+        const realUploadMaterial = async (formData) => {
+            try {
+                const response = await fetch(UPLOAD_API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`服务器错误! 状态码: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                return result;
+                
+            } catch (error) {
+                throw new Error("上传失败: " + error.message);
+            }
+        };
+
+        // 根据配置选择API调用方式
+        const uploadApi = USE_MOCK ? mockUploadMaterial : realUploadMaterial;
+
+        // 显示消息
+        function showMessage(message, isSuccess) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = message;
+            messageEl.className = isSuccess ? 'message success' : 'message error';
+            messageEl.style.display = 'block';
+            
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+
+        // 字符计数
+        document.getElementById('materialName').addEventListener('input', function() {
+            const count = this.value.length;
+            document.getElementById('nameCharCount').textContent = count;
+        });
+
+        // 文件选择处理
+        let selectedFile = null;
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                selectedFile = e.target.files[0];
+                const uploadArea = document.querySelector('.upload-area');
+                uploadArea.innerHTML = `
+                    <i class="fas fa-file"></i>
+                    <h3>已选择文件: ${selectedFile.name}</h3>
+                    <p>文件大小: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p>点击区域可重新选择文件</p>
+                `;
+            }
+        });
+
+        // 上传按钮点击事件
+        document.getElementById('uploadBtn').addEventListener('click', async function() {
+            const materialName = document.getElementById('materialName').value.trim();
+            const materialType = document.getElementById('materialType').value;
+            const expectedScore = document.getElementById('expectedScore').value;
+            const uploadBtn = this;
+            const userId = getCurrentUserId();
+
+            // 前端验证
+            if (!selectedFile) {
+                showMessage('请选择要上传的文件', false);
+                return;
+            }
+
+            if (!materialName) {
+                showMessage('请输入材料名称', false);
+                return;
+            }
+
+            if (materialName.length > 35) {
+                showMessage('材料名称不能超过35字', false);
+                return;
+            }
+
+            if (!materialType) {
+                showMessage('请选择材料类型', false);
+                return;
+            }
+
+            if (!expectedScore) {
+                showMessage('请输入预期加分', false);
+                return;
+            }
+
+            const score = parseFloat(expectedScore);
+            if (isNaN(score) || score < 0 || score > 10) {
+                showMessage('预期加分必须是0-10之间的数字', false);
+                return;
+            }
+
+            if (!userId) {
+                showMessage('未获取到用户ID，请重新登录', false);
+                return;
+            }
+
+            // 创建FormData对象
+            const formData = new FormData();
+            formData.append('file', selectedFile);                    // file字段：上传的实际文件
+            formData.append('material_name', materialName);          // material_name字段
+            formData.append('material_type', materialType);          // material_type字段
+            formData.append('excepted_score', score.toFixed(4));     // excepted_score字段
+            formData.append('id', userId);                           // id字段
+
+            // 禁用按钮，显示加载状态
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 上传中...';
+
+            try {
+                const result = await uploadApi(formData);
+                
+                if (result.ret === 0) {
+                    showMessage('材料上传成功', true);
+                    // 2秒后跳转回材料页面
+                    setTimeout(() => {
+                        if (userId) {
+                            window.location.href = `材料.html?id=${encodeURIComponent(userId)}`;
+                        } else {
+                            window.location.href = '材料.html';
+                        }
+                    }, 2000);
+                } else {
+                    // 后端只返回ret字段，没有message字段，所以使用固定提示
+                    showMessage('材料上传失败，请重试', false);
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fas fa-check"></i> 确认上传';
+                }
+                
+            } catch (error) {
+                showMessage(error.message, false);
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-check"></i> 确认上传';
+            }
+        });
+
+        // 拖拽功能
+        const uploadArea = document.querySelector('.upload-area');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            uploadArea.style.borderColor = '#218838';
+            uploadArea.style.backgroundColor = '#f8f9fa';
+        }
+
+        function unhighlight() {
+            uploadArea.style.borderColor = '';
+            uploadArea.style.backgroundColor = '';
+        }
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('fileInput').files = files;
+            
+            if (files.length > 0) {
+                selectedFile = files[0];
+                uploadArea.innerHTML = `
+                    <i class="fas fa-file"></i>
+                    <h3>已选择文件: ${selectedFile.name}</h3>
+                    <p>文件大小: ${(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    <p>点击区域可重新选择文件</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

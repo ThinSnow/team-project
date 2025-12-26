@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保研小助手 - 登录</title>
+    <style>
+        /* 样式保持不变 */
+        body{
+            font-family: sans-serif;
+            background-image: url(./登录页.png);
+            background-repeat: no-repeat;
+            overflow: hidden;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+        }
+        .container{
+            width: 380px;
+            height: 530px;
+            margin: 7% auto;
+            border-radius: 25px;
+            background-color: aliceblue;
+            box-shadow: 0 0 17px #000000;
+            position: relative;
+        }
+
+        .header{
+            text-align: center;
+            padding-top: 75px;
+        }
+
+        .header h1{
+            color: rgb(99, 200, 160);
+            font-size: 45px;
+            margin-bottom: 80px;
+        }
+
+        .main{
+            text-align: center;
+        }
+
+        .main input{
+            width: 300px;
+            height: 40px;
+            border: none;
+            outline: none;
+            padding-left: 40px;
+            box-sizing: border-box;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .main button{
+            padding-left: 0;
+            background-color: rgb(99, 200, 160);
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-bottom: 70px;
+            color: antiquewhite;
+            width: 300px;
+            height: 40px;
+            border: none;
+            outline: none;
+            padding-left: 0px;
+            box-sizing: border-box;
+            font-size: 15px;
+            color: #fbfbfb;
+        }
+
+        .main button:hover{
+            box-shadow: 2px 2px 5px #555;
+            background-color: rgb(52, 123, 78);
+        }
+
+        .main input:hover{
+            box-shadow: 2px 2px 5px #555;
+            background-color: rgb(225, 225, 225);
+        }
+
+        .zc{
+            border: none;
+            text-decoration: none;
+            font-size: 14px;
+            background-color: aliceblue;
+            margin-left: 0px;
+            color:#6e6d6d
+        }
+
+        .mm{
+            border: none;
+            text-decoration: none;
+            font-size: 14px;
+            background-color: aliceblue;
+            margin-left: 130px;
+            color:#6e6d6d
+        }
+        
+        /* 新增样式 - 保持原有布局 */
+        .error-message {
+            color: #ff3333;
+            font-size: 14px;
+            margin-bottom: 10px;
+            height: 20px;
+        }
+        
+        .loading {
+            display: none;
+            color: rgb(99, 200, 160);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .success-message {
+            color: rgb(99, 200, 160);
+            font-size: 14px;
+            margin-bottom: 10px;
+            height: 20px;
+        }
+        
+        .input-error {
+            box-shadow: 0 0 5px #ff3333 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>保研小助手</h1>
+        </div>
+        <div class="main">
+            <form id="loginForm">
+                <div class="error-message" id="errorMessage"></div>
+                <div class="loading" id="loadingMessage">正在登录，请稍候...</div>
+                <div class="success-message" id="successMessage"></div>
+                
+                <span>
+                    <input type="text" id="id" placeholder="学号/工号" maxlength="15">
+                </span><br>
+                <span>
+                    <input type="password" id="password" placeholder="密码" maxlength="20">
+                </span><br>
+                <a href="学生账号注册页面.html" class="zc">账号注册</a>
+                <a href="注册页面.html" class="mm">忘记密码</a>
+                <br>
+                <br>
+                <button type="submit" id="loginBtn">登录</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ========== 配置区域 ==========
+        // 开发阶段（使用Mock）
+        //const USE_MOCK = true; // true:使用Mock数据, false:连接真实API
+        
+        // 生产阶段（连接真实后端）
+        const USE_MOCK = false; // 改为false连接真实后端
+        const API_URL = 'http://localhost:8000/api/cfunction/login'; // 真实API地址
+        // ========== 配置区域结束 ==========
+        
+        // Mock数据 - 模拟后端用户数据（字段名改为id）
+        const mockUsers = [
+            { id: "202100100100001", password: "password123", identity: "student" },
+            { id: "202100100100002", password: "test123456", identity: "student" },
+            { id: "202100100100003", password: "admin123", identity: "teacher" },
+            { id: "202100100100004", password: "teacher123", identity: "teacher" }
+        ];
+
+        // 模拟网络延迟
+        const simulateNetworkDelay = () => {
+            return new Promise(resolve => setTimeout(resolve, Math.random() * 1500 + 500));
+        };
+
+        // Mock API调用（字段名改为id）
+        const mockApiCall = async (id, password) => {
+            await simulateNetworkDelay();
+            
+            // 模拟网络错误（10%概率）
+            if (Math.random() < 0.1) {
+                throw new Error("网络连接失败，请检查网络设置");
+            }
+            
+            // 查找匹配的用户（字段名改为id）
+            const user = mockUsers.find(u => u.id === id && u.password === password);
+            
+            if (user) {
+                return { 
+                    ret: 0, // 0代表成功
+                    identity: user.identity // 返回身份信息
+                };
+            } else {
+                return { ret: 1 }; // 1代表失败
+            }
+        };
+
+        // 真实API调用函数 - 字段名改为id
+        const realApiCall = async (id, password) => {
+            try {
+                // 发送POST请求，包含学号/工号和密码
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        id: id,           // 发送学号/工号（字段名改为id）
+                        password: password   // 发送密码
+                    })
+                });
+                
+                // 检查HTTP状态码
+                if (!response.ok) {
+                    // 如果HTTP状态码不是200-299，说明请求失败
+                    throw new Error(`服务器错误! 状态码: ${response.status}`);
+                }
+                
+                // 解析响应数据 - 后端返回ret和identity字段
+                const result = await response.json();
+                
+                // 直接返回后端数据，不做额外处理
+                return result;
+                
+            } catch (error) {
+                // 网络请求失败（连接超时、CORS错误等）
+                throw new Error("服务器连接失败: " + error.message);
+            }
+        };
+
+        // 根据配置选择API调用方式
+        const apiCall = USE_MOCK ? mockApiCall : realApiCall;
+
+        // 表单提交处理
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // 获取用户输入的学号/工号和密码
+            const id = document.getElementById('id').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const successMessage = document.getElementById('successMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // 重置状态
+            errorMessage.textContent = '';
+            successMessage.textContent = '';
+            document.getElementById('id').classList.remove('input-error');
+            document.getElementById('password').classList.remove('input-error');
+            
+            // 表单验证
+            if (!id) {
+                errorMessage.textContent = '请输入学号/工号';
+                document.getElementById('id').classList.add('input-error');
+                return;
+            }
+            
+            if (!password) {
+                errorMessage.textContent = '请输入密码';
+                document.getElementById('password').classList.add('input-error');
+                return;
+            }
+            
+            // 显示加载状态
+            loadingMessage.style.display = 'block';
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            
+            try {
+                // 调用API，传递学号/工号和密码
+                const result = await apiCall(id, password);
+                
+                // 隐藏加载状态
+                loadingMessage.style.display = 'none';
+                
+                // 根据返回的ret字段判断是否成功（1代表失败，0代表成功）
+                if (result.ret === 0) {
+                    // 登录成功
+                    successMessage.textContent = "登录成功";
+                    
+                    // 保存用户信息到localStorage
+                    localStorage.setItem('id', id);
+                    localStorage.setItem('identity', result.identity);
+                    
+                    // 根据身份跳转到不同页面，并传递ID参数
+                    setTimeout(() => {
+                        if (result.identity === 'student') {
+                            // 学生身份：跳转到材料页面，并传递ID   teacher
+                            window.location.href = `材料.html?id=${encodeURIComponent(id)}`;
+                        } else if (result.identity === 'administrator') {
+                            // 教师身份：跳转到管理员页面，并传递ID
+                            window.location.href = `管理员材料.html?id=${encodeURIComponent(id)}`;
+                        } else {
+                            // 未知身份，默认跳转到学生页面
+                            window.location.href = `材料.html?id=${encodeURIComponent(id)}`;
+                        }
+                    }, 1000);
+                } else if (result.ret === 1) {
+                    // 登录失败
+                    errorMessage.textContent = "学号/工号或密码错误";
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = '登录';
+                } else {
+                    // 未知的返回结果
+                    errorMessage.textContent = "未知错误，请重试";
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = '登录';
+                }
+            } catch (error) {
+                // 网络请求失败（服务器连接失败等）
+                loadingMessage.style.display = 'none';
+                errorMessage.textContent = error.message;
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            }
+        });
+        
+        // 输入框实时验证
+        document.getElementById('id').addEventListener('input', function() {
+            if (this.value.length > 15) {
+                this.value = this.value.slice(0, 15);
+            }
+        });
+        
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value.length > 20) {
+                this.value = this.value.slice(0, 20);
+            }
+        });
+
+        // 页面跳转函数 - 用于其他页面跳转时传递ID
+        function navigateToPage(pageUrl) {
+            const id = localStorage.getItem('id');
+            if (id) {
+                window.location.href = `${pageUrl}?id=${encodeURIComponent(id)}`;
+            } else {
+                // 如果没有ID，跳转到登录页面
+                window.location.href = '登录页面.html';
+            }
+        }
+
+        // 获取当前页面ID的通用函数（其他页面可以使用）
+        function getCurrentUserId() {
+            // 首先尝试从URL参数获取
+            const urlParams = new URLSearchParams(window.location.search);
+            let id = urlParams.get('id');
+            
+            // 如果URL中没有，尝试从localStorage获取
+            if (!id) {
+                id = localStorage.getItem('id');
+            }
+            
+            return id;
+        }
+
+        // 学生页面跳转映射
+        const studentPages = {
+            '材料.html': '材料.html',
+            '个人中心.html': '个人中心.html',
+            '成绩.html': '成绩.html',
+            '其他学生页面.html': '其他学生页面.html'
+        };
+
+        // 教师页面跳转映射
+        const teacherPages = {
+            '管理员.html': '管理员.html',
+            '管理员个人中心.html': '管理员个人中心.html',
+            '管理员材料.html': '管理员材料.html',
+            '管理员成绩.html': '管理员成绩.html',
+            '其他管理员页面.html': '其他管理员页面.html'
+        };
+    </script>
+</body>
+</html>

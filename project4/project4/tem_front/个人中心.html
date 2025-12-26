@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 学生管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+         /* 左侧导航栏样式 */
+        .sidebar {
+            width: 220px;
+            background-color: rgb(65, 130, 104);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item:hover {
+            background-color: #34495e;
+        }
+        
+        .nav-item.active {
+            background-color: rgb(89, 176, 141);
+            border-left: 4px solid rgb(28, 152, 102);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        /* 个人中心内容样式 */
+        .profile-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgb(89, 179, 143), rgb(40, 131, 95));
+            color: white;
+            
+            
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 25px;
+            font-size: 40px;
+            color: #6d6f70;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        /* 成绩卡片区域 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 25px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid rgb(103, 143, 127);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-title {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .stat-subtitle {
+            font-size: 14px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        
+        /* 底部功能区 */
+        .profile-footer {
+            padding: 20px 30px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .footer-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .footer-btn-primary {
+            background-color: rgb(85, 171, 136);
+            color: white;
+        }
+        
+        .footer-btn-primary:hover {
+            background-color: rgb(72, 151, 120);
+        }
+        
+        .footer-btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .footer-btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 600px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .rule-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .rule-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .rule-points {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .setting-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #3498db;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .nav-items {
+                display: flex;
+                justify-content: space-around;
+            }
+            
+            .nav-item {
+                flex: 1;
+                justify-content: center;
+                padding: 15px 10px;
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            
+            .nav-item span {
+                display: none;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-footer {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .footer-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>保研小助手</h1>
+        </div>
+        <div class="nav-items">
+            <div class="nav-item">
+                <i class="fas fa-folder"></i>
+                <span>材料</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>成绩</span>
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-user"></i>
+                <span>个人中心</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">个人中心</h1>
+        </div>
+        
+        <!-- 个人中心内容 -->
+        <div class="profile-container">
+            <!-- 个人信息头部 -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-info">
+                    <h2 class="profile-name" id="studentName">加载中...</h2>
+                    <div class="profile-details">
+                        <span id="studentUniversity">厦门大学</span>
+                        <span id="studentInfo">2024级信息学院软件工程专业</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 中间展示成绩排名区域 -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-title">当前成绩</div>
+                    <div class="stat-value" id="finalScore">--</div>
+                    <div class="stat-subtitle">综合成绩</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">当前排名</div>
+                    <div class="stat-value" id="ranking">--</div>
+                    <div class="stat-subtitle">总排名</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">绩点</div>
+                    <div class="stat-value" id="gpaDisplay">--</div>
+                    <div class="stat-subtitle">平均绩点</div>
+                </div>
+            </div>
+            
+            <!-- 底部功能区 -->
+            <div class="profile-footer">
+                <button class="footer-btn footer-btn-primary" id="rulesBtn">
+                    <i class="fas fa-calculator"></i>
+                    计算规则须知
+                </button>
+                <button class="footer-btn footer-btn-secondary" id="settingsBtn">
+                    <i class="fas fa-cog"></i>
+                    设置
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 计算规则模态框 -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">成绩计算规则</h2>
+                <button class="close-btn" id="closeRules">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>推免综合成绩由学业综合成绩（含外校单位修习、经学院认定可转换学分的课程成绩，占80%）和考核综合成绩（含学术专长成绩，占比15%；综合表现成绩，占比5%）组成，即推免综合成绩=学业综合成绩×80%+学术专长成绩+综合表现成绩。特殊学术专长推免通过者，给予学术专长成绩满分15分。</p>
+                
+                <div class="rule-item">
+                    <div class="rule-title">一、学业综合成绩计算（满分80分）</div>
+                    <p>学业成绩绩点排名计算方法：（保留小数点后4位）
+课程的平均绩点=∑(单门课程学分绩点×该课程的学分)/∑单门课程学分</p>
+                </div>
+                
+                <div class="rule-item">
+                    <div class="rule-title">二、学术专长成绩计算（满分15分）</div>
+                    <p>1.科研成果</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>学术论文A类：<span class="rule-points">+10分/篇</span></li>
+                        <li>学术论文B类：<span class="rule-points">+6分/篇</span></li>
+                        <li>学术论文C类：<span class="rule-points">+1分/篇</span>（累计不超过2篇）</li>
+                        <li>获得国家发明专利授权：<span class="rule-points">+2分/项</span></li>
+                        <p style="margin-top: 10px; color: #7f8c8d; font-size: 14px;">注：学术论文除导师外的作者，只加前2名，排序第一的加80%，排序第二的加20%，共同第一作者，排序第一和第二的各加50%；除导师外，本科生是独立作者的，加100%。专利只认除导师外的第一作者，加80%，本科生是独立作者的，加100%。</p>
+                    </ul>
+                    <br>
+                    <p>2.学业竞赛</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>A+类国家级一等奖及以上：<span class="rule-points">+30分</span></li>
+                        <li>A+类国家级二等奖：<span class="rule-points">+15分</span></li>
+                        <li>A+类国家级三等奖：<span class="rule-points">+10分</span></li>
+                        <li>A类国家级一等奖及以上：<span class="rule-points">+15分</span></li>
+                        <li>A类国家级二等奖：<span class="rule-points">+10分</span></li>
+                        <li>A类国家级三等奖：<span class="rule-points">+5分</span></li>
+                        <li>A-类国家级一等奖及以上：<span class="rule-points">+10分</span></li>
+                        <li>A-类国家级二等奖：<span class="rule-points">+5分</span></li>
+                        <li>A-类国家级三等奖：<span class="rule-points">+2分</span></li>
+                        <li>A+类省级一等奖及以上：<span class="rule-points">+5分</span></li>
+                        <li>A+类省级二等奖：<span class="rule-points">+2分</span></li>
+                        <li>A类省级一等奖及以上：<span class="rule-points">+2分</span></li>
+                        <li>A类省级二等奖：<span class="rule-points">+1分</span></li>
+                        <li>A-类省级一等奖及以上：<span class="rule-points">+1分</span></li>
+                        <li>A-类省级二等奖：<span class="rule-points">+0.5分</span></li>
+                    </ul>  
+                    <br>  
+                    <p>3.创新创业训练（该项最多加2分）</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>国家级立项：<span class="rule-points">组长+1分，成员+0.3分</span></li>
+                        <li>省级立项：<span class="rule-points">组长+0.5分，成员+0.2分</span></li>
+                        <li>校级立项：<span class="rule-points">组长+0.1分，成员+0.05分</span></li>
+                        <p style="margin-top: 10px; color: #7f8c8d; font-size: 14px;">注：参加创新实验计划项目者，必须项目结题方可加分（需教务处开具证明或者创新网已结题截图，以结项时间为准）。</p>
+                    </ul>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-title">三、综合表现成绩计算（满分5分）</div>
+                     <p>1.国际组织实习（该项最多加1分）</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>到国际组织实习且满一学年：<span class="rule-points">+1分</span></li>
+                        <li>到国际组织实习，满一学期但未满一年：<span class="rule-points">+0.5分</span></li>
+                        <li>到国际组织实习，未满一学期：<span class="rule-points">不加分</span></li>
+                    </ul>
+                    <br>
+                     <p>2.参军入伍服兵役（该项最多加2分）</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>在校期间参军入伍服兵役的学生，一年以上（含一年）、两年以内的：<span class="rule-points">+1分</span></li>
+                        <li>在校期间参军入伍服兵役的学生，两年以上（含两年）的：<span class="rule-points">+2分</span></li>
+                    </ul>
+                    <br>
+                    <p>3.志愿服务（该项最多加1分）</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>志愿服务时间达到200小时后，每增加2小时：<span class="rule-points">+0.05分</span></li>
+                        <li>团队获国家级志愿服务表彰：<span class="rule-points">队长+1分，队员+0.5分</span></li>
+                        <li>团队获省级志愿服务表彰：<span class="rule-points">队长+0.5分，队员+0.25分</span></li>
+                        <li>团队获校级志愿服务表彰：<span class="rule-points">队长+0.25分，队员+0.1分</span></li>
+                        <li>个人获国家级志愿服务表彰：<span class="rule-points">+1分</span></li>
+                        <li>个人获省级志愿服务表彰：<span class="rule-points">+0.5分</span></li>
+                        <li>个人获校级志愿服务表彰：<span class="rule-points">+0.25分</span></li>
+                        <p style="margin-top: 10px; color: #7f8c8d; font-size: 14px;">注：大型赛会志愿者与支教活动工时减半。</p>
+                    </ul>
+                    <br>
+                    <p>4.荣誉称号（该项最多加2分）</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>国家级优秀三好学生、优秀共产党员、五四红旗团支部、优秀团员、"自强之星"、社会实践活动优秀团队或个人等荣誉称号：<span class="rule-points">+0.2分</span></li>
+                        <li>省级优秀三好学生、优秀学生干部、优秀共产党员、五四红旗团支部、优秀团员、优秀团支部书记、社会实践活动优秀团队或个人等荣誉称号：<span class="rule-points">+1分</span></li>
+                        <li>校级优秀三好学生、三好学生、优秀学生干部、优秀共产党员、五四红旗团支部、优秀团员、优秀团支部书记、优秀院学生会主席、优秀班集体、优秀院学生会等荣誉称号：<span class="rule-points">+0.2分</span></li>
+                    </ul>
+                    <br>
+                    <p>5.社会工作（该项最多加2分）</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>担任院学生会执行主席、团总支书记：<span class="rule-points">+2*得分/100分</span></li>
+                        <li>担任院学生会主席团成员、团总支副书记：<span class="rule-points">+1.5*得分/100分</span></li>
+                        <li>担任院学生会、团总支各部部长，党支部书记，班长、团支部书记：<span class="rule-points">+1*得分/100分</span></li>
+                        <li>担任系团总支书记，院学生会、团总支各部门副部长，社团社长：<span class="rule-points">+0.75*得分/100分</span></li>
+                        <li>担任党支部委员，系团总支各部部长，各班班委、团支部委员，院学生会、团总支长期志愿者，社团副社长及社团主要干部、辩论队队长、球队队长等：<span class="rule-points">+0.5*得分/100分</span></li>
+                    </ul>
+                    <br>
+                    <p>6.体育比赛</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>团体项目获国际级冠军的：<span class="rule-points">+8分/项</span></li>
+                        <li>团体项目获国际级亚军的：<span class="rule-points">+6.5分/项</span></li>
+                        <li>团体项目获国际级季军或国家级冠军的：<span class="rule-points">+5分/项</span></li>
+                        <li>团体项目获国际级四至八名或国家级亚军的：<span class="rule-points">+3.5分/项</span></li>
+                        <li>团体项目获国家级季军的：<span class="rule-points">+2分/项</span></li>
+                        <li>团体项目获国家级四至八名的：<span class="rule-points">+1分/项</span></li>
+                        <p style="margin-top: 10px; color: #7f8c8d; font-size: 14px;">注：以上获奖团体项目，参赛成员不考虑排名先后，按参赛人数平均计算加分值；二人项目或个人项目获奖，加分按同一级别团体项目获奖加分值的1/3计算。</p>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 设置模态框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">系统设置</h2>
+                <button class="close-btn" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <div class="setting-name">成绩更新通知</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-name">材料审核提醒</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-name">排名变化通知</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-name">深色模式</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <button class="footer-btn footer-btn-primary" style="width: 100%; margin-bottom: 10px;">
+                        <i class="fas fa-sync-alt"></i>
+                        切换账号
+                    </button>
+                    <button class="footer-btn footer-btn-secondary" style="width: 100%;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        退出登录
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置API地址（后端可以修改这个地址）
+        const API_BASE_URL = 'http://localhost:8000/api/student/personal';
+        const STUDENT_API_URL = `${API_BASE_URL}`;
+        
+        // Mock数据 - 根据后端字段调整
+        const MOCK_STUDENT_DATA = {
+            ret: 0, // 0代表成功，1代表失败
+            retlist: {
+                name: "张三",
+                major: "软件工程专业",
+                score: "96.5",
+                rank: 1,
+                gpa: "3.92",
+                id: "202100100100001" // 添加ID字段
+            }
+        };
+
+        // 全局配置
+        let config = {
+            useMockData: false, // 默认使用Mock数据
+            apiTimeout: 10000, // 10秒超时
+            retryCount: 3, // 重试次数
+            currentRetry: 0
+        };
+
+        // 学生数据结构
+        let studentData = null;
+        // 当前学生ID
+        let currentStudentId = null;
+
+        // 页面加载完成后获取学生数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取URL中的ID参数
+            currentStudentId = getCurrentUserId();
+            
+            if (!currentStudentId) {
+                showNotification('未获取到学生ID，请重新登录', 'error');
+                return;
+            }
+            
+            loadStudentData(currentStudentId);
+            setupEventListeners();
+        });
+
+        // 获取当前页面ID的通用函数（从登录页面传递）
+        function getCurrentUserId() {
+            // 首先尝试从URL参数获取
+            const urlParams = new URLSearchParams(window.location.search);
+            let id = urlParams.get('id');
+            
+            // 如果URL中没有，尝试从localStorage获取
+            if (!id) {
+                id = localStorage.getItem('id');
+            }
+            
+            return id;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 导航栏切换功能（保持原有逻辑不变）
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-item').forEach(nav => {
+                        nav.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const pageTitle = document.querySelector('.page-title');
+                    if (this.querySelector('span').textContent === '材料') {
+                        pageTitle.textContent = '材料管理';
+                        const targetpage = '材料.html';
+                        window.location.assign(`${targetpage}?id=${encodeURIComponent(currentStudentId)}`);
+                    } else if (this.querySelector('span').textContent === '成绩') {
+                        pageTitle.textContent = '成绩管理';
+                        const targetpage = '成绩.html';
+                        window.location.assign(`${targetpage}?id=${encodeURIComponent(currentStudentId)}`);
+                    } else if (this.querySelector('span').textContent === '个人中心') {
+                        pageTitle.textContent = '个人中心';
+                        const targetpage = '个人中心.html';
+                        window.location.assign(`${targetpage}?id=${encodeURIComponent(currentStudentId)}`);
+                    }
+                });
+            });
+
+            // 模态框控制（保持原有逻辑不变）
+            const rulesModal = document.getElementById('rulesModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const rulesBtn = document.getElementById('rulesBtn');
+            const settingsBtn = document.getElementById('settingsBtn');
+            const closeRules = document.getElementById('closeRules');
+            const closeSettings = document.getElementById('closeSettings');
+            
+            rulesBtn.addEventListener('click', function() {
+                rulesModal.style.display = 'flex';
+            });
+            
+            settingsBtn.addEventListener('click', function() {
+                settingsModal.style.display = 'flex';
+            });
+            
+            closeRules.addEventListener('click', function() {
+                rulesModal.style.display = 'none';
+            });
+            
+            closeSettings.addEventListener('click', function() {
+                settingsModal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === rulesModal) {
+                    rulesModal.style.display = 'none';
+                }
+                if (event.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                }
+            });
+        }
+
+        // 获取学生数据的函数
+        async function loadStudentData(studentId) {
+            try {
+                showLoadingState();
+                
+                let data;
+                if (config.useMockData) {
+                    // 使用Mock数据
+                    data = await getMockStudentData(studentId);
+                } else {
+                    // 使用真实API
+                    data = await getRealStudentData(studentId);
+                }
+                
+                // 根据ret字段判断请求是否成功（0成功，1失败）
+                if (data.ret === 0) {
+                    studentData = data.retlist;
+                    updateStudentInfo(studentData);
+                    config.currentRetry = 0; // 重置重试计数
+                } else {
+                    throw new Error('获取数据失败，服务器返回错误状态');
+                }
+                
+            } catch (error) {
+                console.error('获取学生数据失败:', error);
+                handleError(error);
+            }
+        }
+
+        // 获取Mock数据
+        function getMockStudentData(studentId) {
+            return new Promise((resolve) => {
+                // 模拟网络延迟
+                setTimeout(() => {
+                    // 根据ID返回不同的Mock数据
+                    const mockData = {
+                        ...MOCK_STUDENT_DATA,
+                        retlist: {
+                            ...MOCK_STUDENT_DATA.retlist,
+                            id: studentId
+                        }
+                    };
+                    resolve(mockData);
+                }, 500);
+            });
+        }
+
+        // 获取真实API数据
+        async function getRealStudentData(studentId) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), config.apiTimeout);
+            
+            try {
+                // 将学生ID作为查询参数发送给后端
+                const response = await fetch(`${STUDENT_API_URL}?id=${encodeURIComponent(studentId)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 可以添加认证token等头部信息
+                        // 'Authorization': 'Bearer ' + getToken()
+                    },
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+
+        // 更新学生信息到页面
+        function updateStudentInfo(student) {
+            // 更新基本信息
+            document.getElementById('studentName').textContent = student.name || '未知';
+            document.getElementById('studentUniversity').textContent = '厦门大学'; // 固定为厦门大学
+            document.getElementById('studentInfo').textContent = `2024级信息学院${student.major || '未知专业'}`;
+            
+            // 更新成绩信息
+            document.getElementById('finalScore').textContent = student.score || '--';
+            document.getElementById('ranking').textContent = student.rank || '--';
+            document.getElementById('gpaDisplay').textContent = student.gpa || '--';
+        }
+
+        // 显示加载状态
+        function showLoadingState() {
+            document.getElementById('studentName').innerHTML = '<span class="loading"></span> 加载中...';
+            document.getElementById('finalScore').textContent = '--';
+            document.getElementById('ranking').textContent = '--';
+            document.getElementById('gpaDisplay').textContent = '--';
+        }
+
+        // 错误处理
+        function handleError(error) {
+            let errorMessage = '获取数据失败，请稍后重试';
+            
+            if (error.name === 'AbortError') {
+                errorMessage = '请求超时，请检查网络连接';
+            } else if (error.message.includes('404')) {
+                errorMessage = '请求的资源不存在（404错误）';
+            } else if (error.message.includes('500')) {
+                errorMessage = '服务器内部错误，请稍后重试';
+            } else if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
+                errorMessage = '网络连接失败，请检查网络设置';
+                
+                // 只有在Mock模式下才自动切换到真实API模式
+                if (config.useMockData && config.currentRetry < config.retryCount) {
+                    config.currentRetry++;
+                    setTimeout(() => {
+                        showNotification('网络连接失败，自动切换到Mock数据模式', 'warning');
+                        config.useMockData = true;
+                        loadStudentData(currentStudentId);
+                    }, 2000);
+                    return;
+                }
+            }
+            
+            // 显示错误信息
+            showNotification(errorMessage, 'error');
+            console.error('错误详情:', error);
+            
+            // 设置默认数据
+            document.getElementById('studentName').textContent = '数据加载失败';
+            document.getElementById('finalScore').textContent = '--';
+            document.getElementById('ranking').textContent = '--';
+            document.getElementById('gpaDisplay').textContent = '--';
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            // 简单的通知实现，可以替换为更复杂的通知组件
+            console.log(`${type.toUpperCase()}: ${message}`);
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+    </script>
+</body>
+</html>

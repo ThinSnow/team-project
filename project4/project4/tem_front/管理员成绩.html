@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成绩管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        /* 左侧导航栏样式 */
+        .sidebar {
+            width: 220px;
+            background-color: rgb(65, 130, 104);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item:hover {
+            background-color: rgb(17, 95, 64);;
+        }
+        
+        .nav-item.active {
+            background-color: rgb(89, 176, 141);
+            border-left: 4px solid rgb(28, 152, 102);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        /* 搜索和操作区域 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #219653;
+        }
+        
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        /* 表格容器样式 */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, rgb(89, 179, 143), rgb(40, 131, 95));
+            color: white;
+            padding: 20px 25px;
+        }
+        
+        .table-header h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        
+        .table-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .table-scroll {
+            overflow-x: auto;
+            padding: 0 20px 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+        
+        thead {
+            background-color: #f8f9fa;
+        }
+        
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+        }
+        
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .rank {
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+            width: 60px;
+        }
+        
+        .rank-1 {
+            background-color: #ffffff;
+        }
+        
+        .rank-2 {
+            background-color: #ffffff;
+        }
+        
+        .rank-3 {
+            background-color: #ffffff;
+        }
+        
+        .gpa {
+            font-weight: 600;
+            color: #e74c3c;
+        }
+        
+        .final-score {
+            font-weight: 700;
+            color: #27ae60;
+        }
+        
+        .award-item {
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .award-name {
+            display: inline-block;
+            width: 120px;
+            color: #2c3e50;
+        }
+        
+        .award-points {
+            display: inline-block;
+            width: 40px;
+            text-align: right;
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .total-points {
+            font-weight: 700;
+            color: #27ae60;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .edit-btn {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .edit-btn:hover {
+            background-color: #e67e22;
+        }
+        
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .view-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .footer {
+            padding: 15px 30px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .nav-items {
+                display: flex;
+                justify-content: space-around;
+            }
+            
+            .nav-item {
+                flex: 1;
+                justify-content: center;
+                padding: 15px 10px;
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+            
+            .nav-item span {
+                display: none;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .action-cell {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1>保研小助手</h1>
+        </div>
+        <div class="nav-items">
+            <div class="nav-item" data-target="管理员材料.html">
+                <i class="fas fa-folder"></i>
+                <span>材料管理</span>
+            </div>
+            <div class="nav-item active" data-target="管理员成绩.html">
+                <i class="fas fa-chart-bar"></i>
+                <span>成绩管理</span>
+            </div>
+            <div class="nav-item" data-target="管理员个人中心.html">
+                <i class="fas fa-user"></i>
+                <span>个人中心</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="header">
+            <h1 class="page-title">成绩管理</h1>
+            <div class="action-buttons">
+                <button class="btn btn-warning" id="addStudentBtn">
+                    <i class="fas fa-plus"></i>
+                    添加学生
+                </button>
+                <button class="btn btn-success" id="exportGrades">
+                    <i class="fas fa-file-excel"></i>
+                    导出Excel
+                </button>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" class="search-input" id="gradeSearch" placeholder="搜索学生姓名或学号...">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <div class="table-header">
+                <h2>软件工程专业成绩表</h2>
+                <p>2023-2024学年第一学期 | 共<span id="studentCount">0</span>名学生</p>
+            </div>
+            
+            <div class="table-scroll">
+                <table id="gradesTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">排名</th>
+                            <th style="width: 100px;">学号</th>
+                            <th style="width: 120px;">姓名</th>
+                            <th style="width: 80px;">绩点</th>
+                            <th style="width: 300px;">奖项与加分详情</th>
+                            <th style="width: 100px;">最终成绩</th>
+                            <th style="width: 180px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="footer">
+                <div class="info">
+                    最后更新: <span id="lastUpdateTime"></span>
+                </div>
+                <div class="legend">
+                    <span style="color: #e74c3c;">绩点</span> | 
+                    <span style="color: #27ae60;">最终成绩</span> | 
+                    <span style="background-color: #e3f2fd; padding: 2px 5px;">当前用户</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑成绩模态框 -->
+    <div class="modal" id="editGradeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">编辑学生成绩</h2>
+                <button class="close-btn" id="closeEditModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">学号：</label>
+                    <input type="text" class="form-control" id="editStudentId" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">姓名：</label>
+                    <input type="text" class="form-control" id="editStudentName" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">绩点：</label>
+                    <input type="number" class="form-control" id="editGPA" min="0" max="4" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">最终成绩：</label>
+                    <input type="number" class="form-control" id="editFinalScore" min="0" max="100" step="0.1" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button class="btn btn-primary" id="saveGrade">保存修改</button>
+                    <button class="btn btn-primary" id="cancelEdit" style="background-color: #6c757d;">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== 配置区域 ==========
+        // 开发阶段（使用Mock）
+        //const USE_MOCK = true; // true:使用Mock数据, false:连接真实API
+        
+        // 生产阶段（连接真实后端）
+        const USE_MOCK = false; // 改为false连接真实后端
+        const API_STUDENT_INFO = 'http://localhost:8000/api/student/information'; // 学生基本信息API
+        const API_AWARDS_INFO = 'http://localhost:8000/api/student/award'; // 奖项信息API
+        const API_UPDATE_STUDENT_INFO = 'http://localhost:8000/api/administer/student'; // 更新学生基本信息API
+        const API_DELETE_STUDENT = 'http://localhost:8000/api/administer/student'; // 删除学生API
+        // ========== 配置区域结束 ==========
+
+        // 奖项类型映射
+        const awardTypeMapping = {
+            'sci_research': '科研成果',
+            'competition': '学业竞赛',
+            'creation': '创新创业训练',
+            'internship': '国际组织实习',
+            'army': '参军入伍服兵役',
+            'volunteer': '志愿服务',
+            'honor': '荣誉奖项',
+            'social': '社会实践',
+            'sport': '文体活动'
+        };
+
+        // 奖项类型数组，用于遍历
+        const awardTypes = ['sci_research', 'competition', 'creation', 'internship', 'army', 'volunteer', 'honor', 'social', 'sport'];
+
+        // Mock数据 - 学生基本信息
+        const mockStudentInfo = {
+            ret: 0,
+            retlist: [
+                { rank: 1, id: "202301001", name: "张三", gpa: 3.92, score: 96.5 },
+                { rank: 2, id: "202301002", name: "李四", gpa: 3.85, score: 94.2 },
+                { rank: 3, id: "202301003", name: "王五", gpa: 3.78, score: 92.8 },
+                { rank: 4, id: "202301004", name: "赵六", gpa: 3.75, score: 91.5 }
+            ]
+        };
+
+        // Mock数据 - 奖项信息（新格式，包含9个浮点数变量）
+        const mockAwardsInfo = {
+            ret: 0,
+            last_upload_day: "2025-11-17",
+            last_upload_time: "17:00:59",
+            retlist: [
+                {
+                    id: "202301001",
+                    sci_research: 5.0,
+                    competition: 3.0,
+                    creation: 4.0,
+                    internship: 0.0,  // 0分，前端接收但不显示
+                    army: 0.0,        // 0分，前端接收但不显示
+                    volunteer: 2.0,
+                    honor: 0.0,       // 0分，前端接收但不显示
+                    social: 1.5,
+                    sport: 0.0        // 0分，前端接收但不显示
+                },
+                {
+                    id: "202301002",
+                    sci_research: 0.0,
+                    competition: 3.0,
+                    creation: 0.0,
+                    internship: 0.0,
+                    army: 0.0,
+                    volunteer: 2.0,
+                    honor: 1.0,
+                    social: 0.0,
+                    sport: 1.0
+                },
+                {
+                    id: "202301003",
+                    sci_research: 0.0,
+                    competition: 0.0,
+                    creation: 0.0,
+                    internship: 0.0,
+                    army: 0.0,
+                    volunteer: 0.0,
+                    honor: 2.0,
+                    social: 0.0,
+                    sport: 1.0
+                },
+                {
+                    id: "202301004",
+                    sci_research: 0.0,
+                    competition: 0.0,
+                    creation: 0.0,
+                    internship: 0.0,
+                    army: 0.0,
+                    volunteer: 1.0,
+                    honor: 0.0,
+                    social: 2.0,
+                    sport: 0.0
+                }
+            ]
+        };
+
+        // 当前操作的学生ID
+        let currentStudentId = null;
+        let lastUploadDay = '';
+        let lastUploadTime = '';
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchStudentData();
+            setupEventListeners();
+        });
+
+        // 获取学生数据
+        async function fetchStudentData() {
+            try {
+                let studentInfoResponse, awardsInfoResponse;
+                
+                if (USE_MOCK) {
+                    // 使用Mock数据
+                    await new Promise(resolve => setTimeout(resolve, 500)); // 模拟网络延迟
+                    studentInfoResponse = mockStudentInfo;
+                    awardsInfoResponse = mockAwardsInfo;
+                } else {
+                    // 使用真实API
+                    studentInfoResponse = await fetchStudentInfo();
+                    awardsInfoResponse = await fetchAwardsInfo();
+                }
+                
+                // 处理学生基本信息
+                if (studentInfoResponse.ret === 0) {
+                    // 处理奖项信息
+                    if (awardsInfoResponse.ret === 0) {
+                        lastUploadDay = awardsInfoResponse.last_upload_day;
+                        lastUploadTime = awardsInfoResponse.last_upload_time;
+                        
+                        // 合并数据
+                        const mergedData = mergeStudentAndAwardsData(
+                            studentInfoResponse.retlist, 
+                            awardsInfoResponse.retlist
+                        );
+                        
+                        // 更新页面
+                        updateLastUpdateTime();
+                        renderGradesTable(mergedData);
+                    } else {
+                        throw new Error('获取奖项信息失败');
+                    }
+                } else {
+                    throw new Error('获取学生信息失败');
+                }
+                
+            } catch (error) {
+                console.error('获取学生数据失败:', error);
+                alert('获取学生数据失败: ' + error.message);
+            }
+        }
+
+        // 获取学生基本信息（真实API调用）- 不发送token
+        async function fetchStudentInfo() {
+            try {
+                const response = await fetch(API_STUDENT_INFO, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.ret === 0) {
+                    return {
+                        ret: 0,
+                        retlist: result.retlist || []
+                    };
+                } else {
+                    return {
+                        ret: 1
+                    };
+                }
+                
+            } catch (error) {
+                throw new Error("服务器连接失败: " + error.message);
+            }
+        }
+
+        // 获取奖项信息（真实API调用）- 不发送token
+        async function fetchAwardsInfo() {
+            try {
+                const response = await fetch(API_AWARDS_INFO, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.ret === 0) {
+                    return {
+                        ret: 0,
+                        last_upload_day: result.last_upload_day || "2025-11-17",
+                        last_upload_time: result.last_upload_time || "17:00:59",
+                        retlist: result.retlist || []
+                    };
+                } else {
+                    return {
+                        ret: 1
+                    };
+                }
+                
+            } catch (error) {
+                throw new Error("获取奖项信息失败: " + error.message);
+            }
+        }
+
+        // 更新学生基本信息（真实API调用）- 修改：不发送token，简化响应处理
+        async function updateStudentInfo(studentId, gpa, score) {
+            try {
+                const response = await fetch(API_UPDATE_STUDENT_INFO, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        // 只发送业务数据，不发送token
+                        id: studentId,
+                        gpa: gpa,
+                        score: score,
+                        action:'modify_students',
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // 简化响应处理：只检查ret字段
+                if (result.ret === 0) {
+                    return { ret: 0 }; // 成功
+                } else {
+                    return { ret: 1 }; // 失败
+                }
+                
+            } catch (error) {
+                throw new Error("更新学生信息失败: " + error.message);
+            }
+        }
+
+        // 删除学生信息（真实API调用）- 修改：不发送token，简化响应处理
+        async function deleteStudentInfo(studentId) {
+            try {
+                const response = await fetch(API_DELETE_STUDENT, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        // 只发送学生ID，不发送token
+                        id: studentId,
+                        action:'del_students',
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误! 状态码: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // 简化响应处理：只检查ret字段
+                if (result.ret === 0) {
+                    return { ret: 0 }; // 成功
+                } else {
+                    return { ret: 1 }; // 失败
+                }
+                
+            } catch (error) {
+                throw new Error("删除学生信息失败: " + error.message);
+            }
+        }
+
+        // 合并学生基本信息和奖项信息
+        function mergeStudentAndAwardsData(studentData, awardsData) {
+            return studentData.map(student => {
+                // 查找该学生的奖项信息
+                const studentAwards = awardsData.find(award => award.id === student.id);
+                
+                // 处理奖项数据 - 新格式处理
+                const awards = [];
+                let totalPoints = 0;
+                
+                if (studentAwards) {
+                    // 遍历9个奖项类型
+                    awardTypes.forEach(awardType => {
+                        const points = studentAwards[awardType] || 0;
+                        // 只有分数大于0的奖项才显示
+                        if (points > 0) {
+                            awards.push({
+                                name: awardTypeMapping[awardType] || awardType,
+                                points: points
+                            });
+                            totalPoints += points;
+                        }
+                    });
+                }
+                
+                return {
+                    id: student.id,
+                    rank: student.rank,
+                    name: student.name,
+                    gpa: student.gpa,
+                    awards: awards,
+                    totalPoints: totalPoints,
+                    score: student.score
+                };
+            });
+        }
+
+        
+        // 更新最后更新时间
+        function updateLastUpdateTime() {
+            document.getElementById('lastUpdateTime').textContent = `${lastUploadDay} ${lastUploadTime}`;
+        }
+
+        // 渲染成绩表格
+        function renderGradesTable(students) {
+            const tbody = document.querySelector('#gradesTable tbody');
+            tbody.innerHTML = '';
+            
+            students.forEach((student) => {
+                const rankClass = student.rank <= 3 ? `rank rank-${student.rank}` : 'rank';
+                
+                const row = document.createElement('tr');
+                if (student.name === '张三') {
+                    row.classList.add('highlight');
+                }
+                
+                row.innerHTML = `
+                    <td class="${rankClass}">${student.rank}</td>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td class="gpa">${student.gpa}</td>
+                    <td>
+                        ${student.awards.map(award => `
+                            <div class="award-item">
+                                <span class="award-name">${award.name}</span>
+                                <span class="award-points">+${award.points}</span>
+                            </div>
+                        `).join('')}
+                        <div class="total-points">总加分: ${student.totalPoints}</div>
+                    </td>
+                    <td class="final-score">${student.score}</td>
+                    <td class="action-cell">
+                        <button class="action-btn edit-btn" data-id="${student.id}">修改</button>
+                        <button class="action-btn delete-btn" data-id="${student.id}">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('studentCount').textContent = students.length;
+            
+            // 绑定按钮事件
+            bindGradesTableEvents();
+        }
+
+        // 绑定成绩表格事件
+        function bindGradesTableEvents() {
+            // 修改按钮
+            document.querySelectorAll('#gradesTable .edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    showEditGradeModal(studentId);
+                });
+            });
+            
+            // 删除按钮
+            document.querySelectorAll('#gradesTable .delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const studentId = this.getAttribute('data-id');
+                    deleteStudent(studentId);
+                });
+            });
+        }
+
+        // 显示编辑成绩模态框
+        async function showEditGradeModal(studentId) {
+            currentStudentId = studentId;
+            
+            try {
+                let studentInfo;
+                
+                if (USE_MOCK) {
+                    // 使用Mock数据
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    studentInfo = mockStudentInfo.retlist.find(s => s.id === studentId);
+                } else {
+                    // 使用真实API - 这里需要单独获取该学生的详细信息
+                    // 简化处理：从已有数据中查找
+                    studentInfo = mockStudentInfo.retlist.find(s => s.id === studentId);
+                }
+                
+                if (studentInfo) {
+                    document.getElementById('editStudentId').value = studentInfo.id;
+                    document.getElementById('editStudentName').value = studentInfo.name;
+                    document.getElementById('editGPA').value = studentInfo.gpa;
+                    document.getElementById('editFinalScore').value = studentInfo.score;
+                    
+                    document.getElementById('editGradeModal').style.display = 'flex';
+                }
+            } catch (error) {
+                console.error('获取学生详情失败:', error);
+                alert('获取学生详情失败: ' + error.message);
+            }
+        }
+
+        // 保存成绩修改 - 修改错误处理逻辑
+        async function saveGradeChanges() {
+            const gpa = parseFloat(document.getElementById('editGPA').value);
+            const finalScore = parseFloat(document.getElementById('editFinalScore').value);
+            
+            if (isNaN(gpa) || isNaN(finalScore)) {
+                alert('请填写有效的绩点和最终成绩');
+                return;
+            }
+            
+            if (gpa < 0 || gpa > 4 || finalScore < 0 || finalScore > 100) {
+                alert('绩点范围应为0-4，最终成绩范围应为0-100');
+                return;
+            }
+            
+            try {
+                if (USE_MOCK) {
+                    // Mock模式：直接更新本地数据
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // 更新学生基本信息
+                    const studentIndex = mockStudentInfo.retlist.findIndex(s => s.id === currentStudentId);
+                    if (studentIndex !== -1) {
+                        mockStudentInfo.retlist[studentIndex].gpa = gpa;
+                        mockStudentInfo.retlist[studentIndex].score = finalScore;
+                    }
+                    
+                    alert('学生成绩修改成功（Mock模式）');
+                } else {
+                    // 真实API模式：调用后端接口
+                    const studentUpdateResult = await updateStudentInfo(currentStudentId, gpa, finalScore);
+                    
+                    // 简化响应处理：只检查ret字段
+                    if (studentUpdateResult.ret === 0) {
+                        alert('学生成绩修改成功');
+                    } else {
+                        throw new Error('更新学生基本信息失败');
+                    }
+                }
+                
+                // 刷新数据
+                await fetchStudentData();
+                document.getElementById('editGradeModal').style.display = 'none';
+                
+            } catch (error) {
+                console.error('保存成绩修改失败:', error);
+                alert('保存成绩修改失败: ' + error.message);
+            }
+        }
+
+        // 删除学生 - 修改错误处理逻辑
+        async function deleteStudent(studentId) {
+            const student = mockStudentInfo.retlist.find(s => s.id === studentId);
+            if (!student) {
+                alert('未找到该学生信息');
+                return;
+            }
+            
+            if (!confirm(`确定要删除 ${student.name} (${student.id}) 的成绩记录吗？此操作不可恢复！`)) {
+                return;
+            }
+            
+            try {
+                if (USE_MOCK) {
+                    // Mock模式：直接删除本地数据
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // 从学生信息中删除
+                    const studentIndex = mockStudentInfo.retlist.findIndex(s => s.id === studentId);
+                    if (studentIndex !== -1) {
+                        mockStudentInfo.retlist.splice(studentIndex, 1);
+                    }
+                    
+                    // 从奖项信息中删除
+                    const awardIndex = mockAwardsInfo.retlist.findIndex(a => a.id === studentId);
+                    if (awardIndex !== -1) {
+                        mockAwardsInfo.retlist.splice(awardIndex, 1);
+                    }
+                    
+                    alert('学生删除成功（Mock模式）');
+                } else {
+                    // 真实API模式：调用后端接口
+                    const deleteResult = await deleteStudentInfo(studentId);
+                    
+                    // 简化响应处理：只检查ret字段
+                    if (deleteResult.ret === 0) {
+                        alert('学生删除成功');
+                    } else {
+                        throw new Error('删除学生信息失败');
+                    }
+                }
+                
+                // 刷新数据
+                await fetchStudentData();
+                
+            } catch (error) {
+                console.error('删除学生失败:', error);
+                alert('删除学生失败: ' + error.message);
+            }
+        }
+
+        // 添加学生
+        function addStudent() {
+            alert('添加学生功能在实际应用中会连接到后端API');
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 导航栏切换功能 - 修复跳转问题
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const targetPage = this.getAttribute('data-target');
+                    if (targetPage) {
+                        window.location.href = targetPage;
+                    }
+                });
+            });
+            
+            // 搜索功能
+            document.getElementById('gradeSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#gradesTable tbody tr');
+                
+                rows.forEach(row => {
+                    const studentId = row.cells[1].textContent.toLowerCase();
+                    const studentName = row.cells[2].textContent.toLowerCase();
+                    
+                    if (studentId.includes(searchTerm) || studentName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // 导出功能
+            document.getElementById('exportGrades').addEventListener('click', function() {
+                alert('成绩数据已导出为Excel文件');
+            });
+            
+            // 添加学生按钮
+            document.getElementById('addStudentBtn').addEventListener('click', addStudent);
+            
+            // 模态框关闭
+            document.getElementById('closeEditModal').addEventListener('click', function() {
+                document.getElementById('editGradeModal').style.display = 'none';
+            });
+            
+            document.getElementById('cancelEdit').addEventListener('click', function() {
+                document.getElementById('editGradeModal').style.display = 'none';
+            });
+            
+            // 保存修改
+            document.getElementById('saveGrade').addEventListener('click', saveGradeChanges);
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === document.getElementById('editGradeModal')) {
+                    document.getElementById('editGradeModal').style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
